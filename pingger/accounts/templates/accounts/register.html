@@ -1,22 +1,205 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Register | Pingger</title>
-</head>
+<form method="POST">
+    {% csrf_token %}
 
-<body>
+    <!-- Name -->
+    <div class="mb-3">
+        <label for="id_name" class="form-label">Name</label>
+        <input
+            type="text"
+            name="name"
+            id="id_name"
+            class="form-control"
+            placeholder="Enter your name"
+            required
+        >
+    </div>
 
-    <h1>Create your Pingger account</h1>
+    <!-- Email -->
+    <div class="mb-3">
+        <label for="id_email" class="form-label">Email</label>
+        <input
+            type="email"
+            name="email"
+            id="id_email"
+            class="form-control"
+            placeholder="Enter your email"
+            required
+        >
+    </div>
 
-    <form method="POST">
-        {% csrf_token %}
+    <!-- Profession -->
+    <div class="mb-3">
+        <label for="id_profession" class="form-label">Profession</label>
+        <input
+            type="text"
+            name="profession"
+            id="id_profession"
+            class="form-control"
+            placeholder="e.g. Python Developer"
+            required
+        >
+    </div>
 
-        {{ form.as_p }}
+    <!-- Company -->
+    <div class="mb-3">
+        <label for="id_company" class="form-label">
+            Company <span class="text-muted">(Optional)</span>
+        </label>
 
-        <button type="submit">
-            Register
-        </button>
-    </form>
+        <input
+            type="text"
+            name="company"
+            id="id_company"
+            class="form-control"
+            placeholder="Enter your company"
+        >
+    </div>
 
-</body>
-</html>
+    <!-- Password -->
+    <div class="mb-3">
+        <label for="id_password" class="form-label">
+            Password
+        </label>
+
+        <input
+            type="password"
+            name="password"
+            id="id_password"
+            class="form-control"
+            placeholder="Create a strong password"
+            required
+        >
+
+        <!-- Password Requirements -->
+        <div class="mt-2 small" id="password-requirements">
+
+            <div id="length">
+                ✗ At least 8 characters
+            </div>
+
+            <div id="uppercase">
+                ✗ One uppercase letter
+            </div>
+
+            <div id="lowercase">
+                ✗ One lowercase letter
+            </div>
+
+            <div id="number">
+                ✗ One number
+            </div>
+
+            <div id="special">
+                ✗ One special character
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Confirm Password -->
+    <div class="mb-3">
+        <label for="id_confirm_password" class="form-label">
+            Confirm Password
+        </label>
+
+        <input
+            type="password"
+            name="confirm_password"
+            id="id_confirm_password"
+            class="form-control"
+            placeholder="Confirm your password"
+            required
+        >
+
+        <div id="password-match" class="small mt-2"></div>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">
+        Create Account
+    </button>
+
+</form>
+
+<script>
+    const passwordInput = document.getElementById("id_password");
+    const confirmPasswordInput = document.getElementById("id_confirm_password");
+
+    const lengthRequirement = document.getElementById("length");
+    const uppercaseRequirement = document.getElementById("uppercase");
+    const lowercaseRequirement = document.getElementById("lowercase");
+    const numberRequirement = document.getElementById("number");
+    const specialRequirement = document.getElementById("special");
+
+    const passwordMatch = document.getElementById("password-match");
+
+
+    function updateRequirement(element, valid, text) {
+
+        if (valid) {
+            element.textContent = "✓ " + text;
+        } else {
+            element.textContent = "✗ " + text;
+        }
+    }
+
+
+    passwordInput.addEventListener("input", function () {
+
+        const password = passwordInput.value;
+
+        updateRequirement(
+            lengthRequirement,
+            password.length >= 8,
+            "At least 8 characters"
+        );
+
+        updateRequirement(
+            uppercaseRequirement,
+            /[A-Z]/.test(password),
+            "One uppercase letter"
+        );
+
+        updateRequirement(
+            lowercaseRequirement,
+            /[a-z]/.test(password),
+            "One lowercase letter"
+        );
+
+        updateRequirement(
+            numberRequirement,
+            /[0-9]/.test(password),
+            "One number"
+        );
+
+        updateRequirement(
+            specialRequirement,
+            /[^A-Za-z0-9]/.test(password),
+            "One special character"
+        );
+
+        checkPasswordMatch();
+    });
+
+
+    confirmPasswordInput.addEventListener("input", function () {
+        checkPasswordMatch();
+    });
+
+
+    function checkPasswordMatch() {
+
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (confirmPassword === "") {
+            passwordMatch.textContent = "";
+            return;
+        }
+
+        if (password === confirmPassword) {
+            passwordMatch.textContent = "✓ Passwords match";
+        } else {
+            passwordMatch.textContent = "✗ Passwords do not match";
+        }
+    }
+</script>
