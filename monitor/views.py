@@ -1,8 +1,9 @@
 from django.shortcuts import render
 import requests
 import time
+from django.views.decorators.csrf import ensure_csrf_cookie
 
-
+@ensure_csrf_cookie
 def ping(request):
 
     result = None
