@@ -3,6 +3,7 @@
 <head>
     <title>Pingger</title>
 </head>
+
 <body>
 
     <h1>🔔 Pingger</h1>
@@ -10,9 +11,12 @@
     <p>Check whether your website is alive.</p>
 
     <form method="POST">
+
         {% csrf_token %}
 
-        <label for="url">Website URL:</label>
+        <label for="url">
+            Website URL:
+        </label>
 
         <input
             type="url"
@@ -25,14 +29,34 @@
         <button type="submit">
             Check Website
         </button>
+
     </form>
 
+
     {% if result %}
+
         <hr>
 
         <h2>Result</h2>
 
-        <p>{{ result }}</p>
+        <p>
+            {{ result }}
+        </p>
+
+        {% if status_code %}
+            <p>
+                Status Code:
+                <strong>{{ status_code }}</strong>
+            </p>
+        {% endif %}
+
+        {% if response_time %}
+            <p>
+                Response Time:
+                <strong>{{ response_time }} ms</strong>
+            </p>
+        {% endif %}
+
     {% endif %}
 
 </body>
