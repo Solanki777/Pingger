@@ -32,32 +32,31 @@
 
     </form>
 
+{% if result %}
 
-    {% if result %}
+    <hr>
 
-        <hr>
+    <h2>Result</h2>
 
-        <h2>Result</h2>
+    <p>
+        {{ result }}
+    </p>
 
+    {% if status_code %}
         <p>
-            {{ result }}
+            Status Code:
+            <strong>{{ status_code }}</strong>
         </p>
-
-        {% if status_code %}
-            <p>
-                Status Code:
-                <strong>{{ status_code }}</strong>
-            </p>
-        {% endif %}
-
-        {% if response_time %}
-            <p>
-                Response Time:
-                <strong>{{ response_time }} ms</strong>
-            </p>
-        {% endif %}
-
     {% endif %}
+
+    {% if response_time %}
+        <p>
+            Response Time:
+            <strong>{{ response_time }} ms</strong>
+        </p>
+    {% endif %}
+
+{% endif %}
 
 </body>
 </html>
