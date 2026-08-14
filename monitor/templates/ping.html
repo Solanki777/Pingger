@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pingger</title>
+</head>
+<body>
+
+    <h1>🔔 Pingger</h1>
+
+    <p>Check whether your website is alive.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label for="url">Website URL:</label>
+
+        <input
+            type="url"
+            name="url"
+            id="url"
+            placeholder="https://example.com"
+            required
+        >
+
+        <button type="submit">
+            Check Website
+        </button>
+    </form>
+
+    {% if result %}
+        <hr>
+
+        <h2>Result</h2>
+
+        <p>{{ result }}</p>
+    {% endif %}
+
+</body>
+</html>
