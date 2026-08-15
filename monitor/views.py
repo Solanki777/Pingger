@@ -88,3 +88,95 @@ def ping(request):
                     "status_code":status_code,
                     "response_time":response_time,
                      "status_type":status_type })
+
+
+def check_monitor(request, id):
+
+    monitor = Monitor.objects.get(id=id)
+
+    start_time = time.time()
+
+    try:
+        response = requests.get(
+            monitor.url,
+            timeout=10
+        )
+
+        end_time = time.time()
+
+        response_time = round(
+            (end_time - start_time) * 1000,
+            2
+        )
+
+        status_code = response.status_code
+
+        success = 200 <= status_code < 300
+
+        HealthCheck.objects.create(
+            monitor=monitor,
+            status_code=status_code,
+            response_time=response_time,
+            success=success
+        )
+
+        result = "Website is healthy" if success else "Website returned an error"
+
+    except requests.Timeout:
+
+        HealthCheck.objects.create(
+            monitor=monitor,
+            success=False,
+            error="Request timed out"
+        )
+
+        result = "Request timed out"
+
+    except requests.ConnectionError:
+
+        HealthCheck.objects.create(
+            monitor=monitor,
+            success=False,
+            error="Connection failed"
+        )
+
+        result = "Connection failed"
+
+    except requests.RequestException as e:
+
+        HealthCheck.objects.create(
+            monitor=monitor,
+            success=False,
+            error=str(e)
+        )
+
+        result = "Health check failed"
+
+    return render(
+        request,
+        "check_result.html",
+        {
+            "monitor": monitor,
+            "result": result,
+        }
+    )
+
+def monitor_details(request, id):
+
+    monitor = Monitor.objects.get(id=id)
+
+    health_checks = monitor.health_checks.order_by(
+        "-checked_at"
+    )
+
+    latest_check = health_checks.first()
+
+    return render(
+        request,
+        "monitor_details.html",
+        {
+            "monitor": monitor,
+            "health_checks": health_checks,
+            "latest_check": latest_check,
+        }
+    )

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{{ monitor.name }} - Pingger</title>
+</head>
+
+<body>
+
+    <h1>🔔 Pingger</h1>
+
+    <h2>{{ monitor.name }}</h2>
+
+    <p>
+        {{ monitor.url }}
+    </p>
+
+    {% if latest_check %}
+
+        <hr>
+
+        <h2>
+            {% if latest_check.success %}
+                🟢 HEALTHY
+            {% else %}
+                🔴 DOWN
+            {% endif %}
+        </h2>
+
+        <p>
+            Status Code:
+            {{ latest_check.status_code|default:"—" }}
+        </p>
+
+        <p>
+            Response Time:
+            {% if latest_check.response_time %}
+                {{ latest_check.response_time }} ms
+            {% else %}
+                —
+            {% endif %}
+        </p>
+
+        <p>
+            Checked:
+            {{ latest_check.checked_at }}
+        </p>
+
+        {% if latest_check.error %}
+            <p>
+                Error:
+                {{ latest_check.error }}
+            </p>
+        {% endif %}
+
+    {% else %}
+
+        <p>
+            No health checks yet.
+        </p>
+
+    {% endif %}
+
+
+    <hr>
+
+    <h2>Health History</h2>
+
+    {% if health_checks %}
+
+        <table border="1" cellpadding="8">
+
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Response Time</th>
+                    <th>Result</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for check in health_checks %}
+
+                    <tr>
+
+                        <td>
+                            {{ check.checked_at }}
+                        </td>
+
+                        <td>
+                            {{ check.status_code|default:"—" }}
+                        </td>
+
+                        <td>
+                            {% if check.response_time %}
+                                {{ check.response_time }} ms
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>
+
+                            {% if check.success %}
+                                🟢 Success
+                            {% else %}
+                                🔴 Failed
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>
+            No checks have been recorded yet.
+        </p>
+
+    {% endif %}
+
+    <br>
+
+    <a href="{% url 'check_monitor' monitor.id %}">
+        Check Now
+    </a>
+
+    <br><br>
+
+    <a href="{% url 'monitor_list' %}">
+        Back to Monitors
+    </a>
+
+</body>
+
+</html>

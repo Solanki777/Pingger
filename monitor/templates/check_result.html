@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Health Check - Pingger</title>
+</head>
+
+<body>
+
+    <h1>🔔 Pingger</h1>
+
+    <h2>{{ monitor.name }}</h2>
+
+    <p>
+        URL: {{ monitor.url }}
+    </p>
+
+    <hr>
+
+    <h2>{{ result }}</h2>
+
+    <a href="{% url 'monitor_list' %}">
+        Back to Monitors
+    </a>
+
+</body>
+</html>

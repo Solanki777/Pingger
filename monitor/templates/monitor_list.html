@@ -21,6 +21,12 @@
         {% for monitor in monitors %}
 
             <div>
+                <a href="{% url 'check_monitor' monitor.id %}">
+    Check Now
+</a>
+<a href="{% url 'monitor_details' monitor.id %}">
+    View Details
+</a>
 
                 <h3>{{ monitor.name }}</h3>
 
