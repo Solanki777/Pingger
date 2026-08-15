@@ -1,14 +1,16 @@
 import requests
 import time
 
+from .models import HealthCheck
 
-def check_monitor(url):
+
+def perform_health_check(monitor):
+
+    start_time = time.time()
 
     try:
-        start_time = time.time()
-
         response = requests.get(
-            url,
+            monitor.url,
             timeout=10
         )
 
@@ -19,36 +21,39 @@ def check_monitor(url):
             2
         )
 
-        return {
-            "success": 200 <= response.status_code < 300,
-            "status_code": response.status_code,
-            "response_time": response_time,
-            "error": None,
-        }
+        status_code = response.status_code
+
+        success = 200 <= status_code < 300
+
+        health_check = HealthCheck.objects.create(
+            monitor=monitor,
+            status_code=status_code,
+            response_time=response_time,
+            success=success
+        )
+
+        return health_check
 
     except requests.Timeout:
 
-        return {
-            "success": False,
-            "status_code": None,
-            "response_time": None,
-            "error": "Request timed out",
-        }
+        return HealthCheck.objects.create(
+            monitor=monitor,
+            success=False,
+            error="Request timed out"
+        )
 
     except requests.ConnectionError:
 
-        return {
-            "success": False,
-            "status_code": None,
-            "response_time": None,
-            "error": "Connection failed",
-        }
+        return HealthCheck.objects.create(
+            monitor=monitor,
+            success=False,
+            error="Connection failed"
+        )
 
     except requests.RequestException as e:
 
-        return {
-            "success": False,
-            "status_code": None,
-            "response_time": None,
-            "error": str(e),
-        }
+        return HealthCheck.objects.create(
+            monitor=monitor,
+            success=False,
+            error=str(e)
+        )
