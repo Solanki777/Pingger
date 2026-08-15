@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 import requests
 import time
 from django.views.decorators.csrf import ensure_csrf_cookie
-from .models import Monitor
+from .models import Monitor,HealthCheck
 
 def add_monitor(request):
     if request.method == "POST":
