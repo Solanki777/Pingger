@@ -1,7 +1,31 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 import requests
 import time
 from django.views.decorators.csrf import ensure_csrf_cookie
+from .models import Monitor
+
+def add_monitor(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        url = request.POST.get("url")
+
+        Monitor.objects.create(
+            name = name,
+            url = url
+        )
+        return redirect("monitor_list")
+    return render(request,"add_monitor.html")
+
+def monitor_list(request):
+    monitors = Monitor.objects.all()
+    return render(
+        request,
+        "monitor_list.html",
+        {
+            "monitors": monitors
+        }
+    )
+
 
 @ensure_csrf_cookie
 def ping(request):

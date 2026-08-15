@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Monitors - Pingger</title>
+</head>
+
+<body>
+
+    <h1>🔔 Pingger</h1>
+
+    <h2>My Monitors</h2>
+
+    <a href="{% url 'add_monitor' %}">
+        + Add Monitor
+    </a>
+
+    <hr>
+
+    {% if monitors %}
+
+        {% for monitor in monitors %}
+
+            <div>
+
+                <h3>{{ monitor.name }}</h3>
+
+                <p>
+                    URL:
+                    {{ monitor.url }}
+                </p>
+
+                <p>
+                    Status:
+                    {% if monitor.is_active %}
+                        🟢 Monitoring
+                    {% else %}
+                        ⚪ Disabled
+                    {% endif %}
+                </p>
+
+                <p>
+                    Added:
+                    {{ monitor.created_at }}
+                </p>
+
+            </div>
+
+            <hr>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>
+            You don't have any monitors yet.
+        </p>
+
+    {% endif %}
+
+</body>
+</html>
