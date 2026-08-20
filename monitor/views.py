@@ -4,6 +4,35 @@ from django_celery_beat.models import IntervalSchedule, PeriodicTask
 from .models import Monitor
 from .services import perform_health_check
 from django.shortcuts import get_object_or_404, redirect, render
+from django.http import JsonResponse
+
+def monitor_logs_api(request, id):
+
+    monitor = get_object_or_404(
+        Monitor,
+        id=id
+    )
+
+    health_checks = monitor.health_checks.order_by(
+        "-checked_at"
+    )[:20]
+
+    logs = []
+
+    for check in health_checks:
+
+        logs.append({
+            "time": check.checked_at.strftime("%H:%M:%S"),
+            "status_code": check.status_code,
+            "response_time": check.response_time,
+            "success": check.success,
+            "check_type": check.check_type,
+            "error": check.error,
+        })
+
+    return JsonResponse({
+        "logs": logs
+    })
 
 def check_monitor(request, id):
 

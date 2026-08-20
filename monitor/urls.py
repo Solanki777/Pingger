@@ -26,4 +26,10 @@ path(
     views.delete_monitor,
     name="delete_monitor"
 ),
+path(
+    "monitors/<int:id>/logs/",
+    views.monitor_logs_api,
+    name="monitor_logs_api"
+),
+
 ]
