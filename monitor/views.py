@@ -31,14 +31,19 @@ def check_monitor(request, id):
 
 
 def add_monitor(request):
+
     if request.method == "POST":
+
         name = request.POST.get("name")
         url = request.POST.get("url")
+        check_interval = request.POST.get("check_interval")
 
         Monitor.objects.create(
-            name = name,
-            url = url
+            name=name,
+            url=url,
+            check_interval=check_interval
         )
+
         return redirect("monitor_list")
     return render(request,"add_monitor.html")
 
