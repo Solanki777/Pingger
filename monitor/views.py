@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
-
-from django.views.decorators.csrf import ensure_csrf_cookie
+import json
+from django_celery_beat.models import IntervalSchedule, PeriodicTask
 from .models import Monitor
 from .services import perform_health_check
 from django.shortcuts import get_object_or_404, redirect, render
@@ -38,11 +38,28 @@ def edit_monitor(request, id):
 
         monitor.name = request.POST.get("name")
         monitor.url = request.POST.get("url")
-        monitor.check_interval = request.POST.get(
-            "check_interval"
+
+        new_interval = int(
+            request.POST.get("check_interval")
         )
 
+        monitor.check_interval = new_interval
+
         monitor.save()
+
+        periodic_task = PeriodicTask.objects.filter(
+        name=f"monitor-{monitor.id}"
+        ).first()
+
+        if periodic_task:
+
+            schedule, created = IntervalSchedule.objects.get_or_create(
+                every=new_interval,
+                period=IntervalSchedule.MINUTES,
+            )
+
+            periodic_task.interval = schedule
+            periodic_task.save()
 
         return redirect("monitor_list")
 
@@ -54,7 +71,6 @@ def edit_monitor(request, id):
         }
     )
 
-
 def delete_monitor(request, id):
 
     monitor = get_object_or_404(
@@ -64,14 +80,15 @@ def delete_monitor(request, id):
 
     if request.method == "POST":
 
+        PeriodicTask.objects.filter(
+            name=f"monitor-{monitor.id}"
+        ).delete()
+
         monitor.delete()
 
         return redirect("monitor_list")
 
     return redirect("monitor_list")
-
-
-
 
 
 def add_monitor(request):
@@ -80,18 +97,34 @@ def add_monitor(request):
 
         name = request.POST.get("name")
         url = request.POST.get("url")
-        check_interval = request.POST.get("check_interval")
+        check_interval = int(
+            request.POST.get("check_interval")
+        )
 
-        Monitor.objects.create(
+        monitor = Monitor.objects.create(
             name=name,
             url=url,
             check_interval=check_interval
         )
 
+        schedule, created = IntervalSchedule.objects.get_or_create(
+            every=check_interval,
+            period=IntervalSchedule.MINUTES,
+        )
+
+        PeriodicTask.objects.create(
+        interval=schedule,
+        name=f"monitor-{monitor.id}",
+        task="monitor.tasks.check_monitor_task",
+        args=json.dumps([monitor.id]),
+    )
+
         return redirect("monitor_list")
-    return render(request,"add_monitor.html")
 
-
+    return render(
+        request,
+        "add_monitor.html"
+    )
 
 
 
