@@ -156,10 +156,6 @@
 
 
     <!-- Health History -->
-
-    <hr>
-
-
 <h2>Request / Response Logs</h2>
 
 <div class="log-terminal">
@@ -172,91 +168,18 @@
         </span>
     </div>
 
-    <div class="log-content">
-
-        {% if health_checks %}
-
-            {% for check in health_checks %}
-
-                <div class="log-line">
-
-                    <span class="log-time">
-                        {{ check.checked_at|date:"H:i:s" }}
-                    </span>
-
-                    &nbsp;
-
-                    {% if check.check_type == "celery" %}
-
-                        <span class="log-celery">
-                            🤖 CELERY
-                        </span>
-
-                    {% else %}
-
-                        <span class="log-user">
-                            🧑 USER
-                        </span>
-
-                    {% endif %}
-
-                    &nbsp;
-
-                    <span>
-                        GET / HTTP/1.1
-                    </span>
-
-                    &nbsp;
-
-                    {% if check.success %}
-
-                        <span class="log-success">
-                            {{ check.status_code }}
-                        </span>
-
-                    {% else %}
-
-                        <span class="log-failed">
-                            {{ check.status_code|default:"FAILED" }}
-                        </span>
-
-                    {% endif %}
-
-                    &nbsp;
-
-                    {% if check.response_time %}
-
-                        <span class="log-response">
-                            {{ check.response_time }} ms
-                        </span>
-
-                    {% endif %}
-
-                    {% if check.error %}
-
-                        &nbsp;
-
-                        <span class="log-error">
-                            {{ check.error }}
-                        </span>
-
-                    {% endif %}
-
-                </div>
-
-            {% endfor %}
-
-        {% else %}
-
-            <div class="log-line">
-                No requests recorded yet.
-            </div>
-
-        {% endif %}
-
+    <div
+        id="log-content"
+        class="log-content"
+    >
+        Loading logs...
     </div>
 
 </div>
+
+    <hr>
+
+
 
 
     <br>
@@ -270,7 +193,111 @@
     <a href="{% url 'monitor_list' %}">
         ← Back to Monitors
     </a>
+<script>
 
+    const logsUrl = "{% url 'monitor_logs_api' monitor.id %}";
+
+    function loadLogs() {
+
+        fetch(logsUrl)
+            .then(response => response.json())
+            .then(data => {
+
+                const container =
+                    document.getElementById("log-content");
+
+                container.innerHTML = "";
+
+                if (data.logs.length === 0) {
+
+                    container.innerHTML =
+                        '<div class="log-line">No requests recorded yet.</div>';
+
+                    return;
+                }
+
+                data.logs.forEach(log => {
+
+                    const line =
+                        document.createElement("div");
+
+                    line.className = "log-line";
+
+                    const source =
+                        log.check_type === "celery"
+                            ? "🤖 CELERY"
+                            : "🧑 USER";
+
+                    const status =
+                        log.success
+                            ? `🟢 ${log.status_code}`
+                            : `🔴 ${log.status_code || "FAILED"}`;
+
+                    const responseTime =
+                        log.response_time !== null
+                            ? `${log.response_time} ms`
+                            : "—";
+
+                    line.innerHTML = `
+                        <span class="log-time">
+                            ${log.time}
+                        </span>
+
+                        &nbsp;
+
+                        <span>
+                            ${source}
+                        </span>
+
+                        &nbsp;
+
+                        <span>
+                            GET / HTTP/1.1
+                        </span>
+
+                        &nbsp;
+
+                        <span>
+                            ${status}
+                        </span>
+
+                        &nbsp;
+
+                        <span class="log-response">
+                            ${responseTime}
+                        </span>
+
+                        ${
+                            log.error
+                                ? `<span class="log-error">
+                                    ${log.error}
+                                   </span>`
+                                : ""
+                        }
+                    `;
+
+                    container.appendChild(line);
+
+                });
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "Failed to load monitor logs:",
+                    error
+                );
+
+            });
+    }
+
+    // Load logs immediately
+    loadLogs();
+
+    // Check for new logs every 5 seconds
+    setInterval(loadLogs, 5000);
+
+</script>
 </body>
 
 </html>
