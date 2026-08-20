@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Health Check - Pingger</title>
+    <title>{{ monitor.name }} - Pingger</title>
 </head>
 
 <body>
@@ -11,16 +12,74 @@
     <h2>{{ monitor.name }}</h2>
 
     <p>
-        URL: {{ monitor.url }}
+        URL:
+        <a href="{{ monitor.url }}" target="_blank">
+            {{ monitor.url }}
+        </a>
     </p>
 
     <hr>
 
-    <h2>{{ result }}</h2>
+    {% if health_check.success %}
+
+        <h2>🟢 Website is UP</h2>
+
+        <p>
+            Status Code:
+            <strong>{{ health_check.status_code }}</strong>
+        </p>
+
+        <p>
+            Response Time:
+            <strong>{{ health_check.response_time }} ms</strong>
+        </p>
+
+    {% else %}
+
+        <h2>🔴 Website is DOWN</h2>
+
+        {% if health_check.status_code %}
+            <p>
+                Status Code:
+                <strong>{{ health_check.status_code }}</strong>
+            </p>
+        {% endif %}
+
+        {% if health_check.error %}
+            <p>
+                Error:
+                <strong>{{ health_check.error }}</strong>
+            </p>
+        {% endif %}
+
+    {% endif %}
+
+    <hr>
+
+    <h3>Monitor Settings</h3>
+
+    <p>
+        Check every:
+        <strong>{{ monitor.check_interval }} minutes</strong>
+    </p>
+
+    <p>
+        Last checked:
+        <strong>{{ health_check.checked_at }}</strong>
+    </p>
+
+    <br>
+
+    <a href="{% url 'monitor_details' monitor.id %}">
+        View Monitoring History
+    </a>
+
+    <br><br>
 
     <a href="{% url 'monitor_list' %}">
-        Back to Monitors
+        ← Back to Monitors
     </a>
 
 </body>
+
 </html>

@@ -5,24 +5,20 @@ from .models import Monitor
 from .services import perform_health_check
 from django.shortcuts import get_object_or_404, redirect, render
 
-
 def check_monitor(request, id):
 
-    monitor = Monitor.objects.get(id=id)
+    monitor = get_object_or_404(
+        Monitor,
+        id=id
+    )
 
     health_check = perform_health_check(monitor)
-
-    if health_check.success:
-        result = "Website is healtsdkfkadsjhy"
-    else:
-        result = "Website check fadjf;alsdfailed"
 
     return render(
         request,
         "check_result.html",
         {
             "monitor": monitor,
-            "result": result,
             "health_check": health_check,
         }
     )

@@ -12,8 +12,19 @@
     <h2>{{ monitor.name }}</h2>
 
     <p>
-        {{ monitor.url }}
+        URL:
+        <a href="{{ monitor.url }}" target="_blank">
+            {{ monitor.url }}
+        </a>
     </p>
+
+    <p>
+        Check every:
+        <strong>{{ monitor.check_interval }} minutes</strong>
+    </p>
+
+
+    <!-- Latest Status -->
 
     {% if latest_check %}
 
@@ -21,62 +32,82 @@
 
         <h2>
             {% if latest_check.success %}
-                🟢 HEALTHY
+                🟢 WEBSITE IS UP
             {% else %}
-                🔴 DOWN
+                🔴 WEBSITE IS DOWN
             {% endif %}
         </h2>
 
         <p>
             Status Code:
-            {{ latest_check.status_code|default:"—" }}
+            <strong>
+                {{ latest_check.status_code|default:"—" }}
+            </strong>
         </p>
 
         <p>
             Response Time:
-            {% if latest_check.response_time %}
-                {{ latest_check.response_time }} ms
-            {% else %}
-                —
-            {% endif %}
+            <strong>
+                {% if latest_check.response_time %}
+                    {{ latest_check.response_time }} ms
+                {% else %}
+                    —
+                {% endif %}
+            </strong>
         </p>
 
         <p>
-            Checked:
-            {{ latest_check.checked_at }}
+            Last Checked:
+            <strong>
+                {{ latest_check.checked_at }}
+            </strong>
         </p>
 
         {% if latest_check.error %}
+
             <p>
                 Error:
-                {{ latest_check.error }}
+                <strong>
+                    {{ latest_check.error }}
+                </strong>
             </p>
+
         {% endif %}
 
     {% else %}
 
+        <hr>
+
+        <h2>⚪ NOT CHECKED YET</h2>
+
         <p>
-            No health checks yet.
+            No health checks have been performed yet.
         </p>
 
     {% endif %}
 
 
+    <!-- Health History -->
+
     <hr>
 
-    <h2>Health History</h2>
+    <h2>Request / Response Logs</h2>
 
     {% if health_checks %}
 
         <table border="1" cellpadding="8">
 
             <thead>
+
                 <tr>
                     <th>Time</th>
+                    <th>Method</th>
                     <th>Status</th>
                     <th>Response Time</th>
                     <th>Result</th>
+                    <th>Error</th>
                 </tr>
+
             </thead>
 
             <tbody>
@@ -85,28 +116,85 @@
 
                     <tr>
 
+                        <!-- Time -->
+
                         <td>
                             {{ check.checked_at }}
                         </td>
 
-                        <td>
-                            {{ check.status_code|default:"—" }}
-                        </td>
+
+                        <!-- Method -->
 
                         <td>
-                            {% if check.response_time %}
-                                {{ check.response_time }} ms
-                            {% else %}
-                                —
-                            {% endif %}
+                            GET
                         </td>
+
+
+                        <!-- Status -->
 
                         <td>
 
                             {% if check.success %}
-                                🟢 Success
+
+                                🟢
+                                {{ check.status_code|default:"—" }}
+
                             {% else %}
-                                🔴 Failed
+
+                                🔴
+                                {{ check.status_code|default:"FAILED" }}
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Response Time -->
+
+                        <td>
+
+                            {% if check.response_time %}
+
+                                {{ check.response_time }} ms
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Result -->
+
+                        <td>
+
+                            {% if check.success %}
+
+                                Success
+
+                            {% else %}
+
+                                Failed
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Error -->
+
+                        <td>
+
+                            {% if check.error %}
+
+                                {{ check.error }}
+
+                            {% else %}
+
+                                —
+
                             {% endif %}
 
                         </td>
@@ -122,21 +210,22 @@
     {% else %}
 
         <p>
-            No checks have been recorded yet.
+            No request/response logs yet.
         </p>
 
     {% endif %}
 
+
     <br>
 
     <a href="{% url 'check_monitor' monitor.id %}">
-        Check Now
+        🔄 Check Now
     </a>
 
     <br><br>
 
     <a href="{% url 'monitor_list' %}">
-        Back to Monitors
+        ← Back to Monitors
     </a>
 
 </body>
