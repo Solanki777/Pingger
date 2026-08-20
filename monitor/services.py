@@ -4,7 +4,7 @@ import time
 from .models import HealthCheck
 
 
-def perform_health_check(monitor):
+def perform_health_check(monitor, check_type="user"):
 
     start_time = time.time()
 
@@ -27,6 +27,7 @@ def perform_health_check(monitor):
 
         health_check = HealthCheck.objects.create(
             monitor=monitor,
+            check_type=check_type,
             status_code=status_code,
             response_time=response_time,
             success=success
@@ -38,6 +39,7 @@ def perform_health_check(monitor):
 
         return HealthCheck.objects.create(
             monitor=monitor,
+            check_type=check_type,
             success=False,
             error="Request timed out"
         )
@@ -46,6 +48,7 @@ def perform_health_check(monitor):
 
         return HealthCheck.objects.create(
             monitor=monitor,
+            check_type=check_type,
             success=False,
             error="Connection failed"
         )
@@ -54,6 +57,7 @@ def perform_health_check(monitor):
 
         return HealthCheck.objects.create(
             monitor=monitor,
+            check_type=check_type,
             success=False,
             error=str(e)
         )

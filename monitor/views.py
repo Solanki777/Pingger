@@ -12,7 +12,10 @@ def check_monitor(request, id):
         id=id
     )
 
-    health_check = perform_health_check(monitor)
+    health_check = perform_health_check(
+    monitor,
+    check_type="user"
+)
 
     return render(
         request,

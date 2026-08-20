@@ -28,6 +28,10 @@ class HealthCheck(models.Model):
         null=True,
         blank=True
     )
+    check_type = models.CharField(
+    max_length=20,
+    default="user"
+)
 
     response_time = models.FloatField(
         null=True,

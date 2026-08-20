@@ -3,6 +3,74 @@
 
 <head>
     <title>{{ monitor.name }} - Pingger</title>
+    <style>
+    .log-terminal {
+        background: #0d1117;
+        color: #c9d1d9;
+        border-radius: 8px;
+        border: 1px solid #30363d;
+        overflow: hidden;
+        font-family: Consolas, "Courier New", monospace;
+    }
+
+    .log-terminal-header {
+        padding: 12px 16px;
+        background: #161b22;
+        border-bottom: 1px solid #30363d;
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+    }
+
+    .live {
+        float: right;
+        color: #3fb950;
+        font-size: 13px;
+    }
+
+    .log-content {
+        padding: 8px 0;
+        max-height: 450px;
+        overflow-y: auto;
+    }
+
+    .log-line {
+        padding: 7px 16px;
+        white-space: nowrap;
+        font-size: 14px;
+    }
+
+    .log-line:hover {
+        background: #161b22;
+    }
+
+    .log-time {
+        color: #8b949e;
+    }
+
+    .log-user {
+        color: #58a6ff;
+    }
+
+    .log-celery {
+        color: #d2a8ff;
+    }
+
+    .log-success {
+        color: #3fb950;
+    }
+
+    .log-failed {
+        color: #f85149;
+    }
+
+    .log-response {
+        color: #79c0ff;
+    }
+
+    .log-error {
+        color: #f85149;
+    }
+</style>
 </head>
 
 <body>
@@ -91,129 +159,104 @@
 
     <hr>
 
-    <h2>Request / Response Logs</h2>
 
-    {% if health_checks %}
+<h2>Request / Response Logs</h2>
 
-        <table border="1" cellpadding="8">
+<div class="log-terminal">
 
-            <thead>
+    <div class="log-terminal-header">
+        Monitor Logs
 
-                <tr>
-                    <th>Time</th>
-                    <th>Method</th>
-                    <th>Status</th>
-                    <th>Response Time</th>
-                    <th>Result</th>
-                    <th>Error</th>
-                </tr>
+        <span class="live">
+            ● LIVE
+        </span>
+    </div>
 
-            </thead>
+    <div class="log-content">
 
-            <tbody>
+        {% if health_checks %}
 
-                {% for check in health_checks %}
+            {% for check in health_checks %}
 
-                    <tr>
+                <div class="log-line">
 
-                        <!-- Time -->
+                    <span class="log-time">
+                        {{ check.checked_at|date:"H:i:s" }}
+                    </span>
 
-                        <td>
-                            {{ check.checked_at }}
-                        </td>
+                    &nbsp;
 
+                    {% if check.check_type == "celery" %}
 
-                        <!-- Method -->
+                        <span class="log-celery">
+                            🤖 CELERY
+                        </span>
 
-                        <td>
-                            GET
-                        </td>
+                    {% else %}
 
+                        <span class="log-user">
+                            🧑 USER
+                        </span>
 
-                        <!-- Status -->
+                    {% endif %}
 
-                        <td>
+                    &nbsp;
 
-                            {% if check.success %}
+                    <span>
+                        GET / HTTP/1.1
+                    </span>
 
-                                🟢
-                                {{ check.status_code|default:"—" }}
+                    &nbsp;
 
-                            {% else %}
+                    {% if check.success %}
 
-                                🔴
-                                {{ check.status_code|default:"FAILED" }}
+                        <span class="log-success">
+                            {{ check.status_code }}
+                        </span>
 
-                            {% endif %}
+                    {% else %}
 
-                        </td>
+                        <span class="log-failed">
+                            {{ check.status_code|default:"FAILED" }}
+                        </span>
 
+                    {% endif %}
 
-                        <!-- Response Time -->
+                    &nbsp;
 
-                        <td>
+                    {% if check.response_time %}
 
-                            {% if check.response_time %}
+                        <span class="log-response">
+                            {{ check.response_time }} ms
+                        </span>
 
-                                {{ check.response_time }} ms
+                    {% endif %}
 
-                            {% else %}
+                    {% if check.error %}
 
-                                —
+                        &nbsp;
 
-                            {% endif %}
+                        <span class="log-error">
+                            {{ check.error }}
+                        </span>
 
-                        </td>
+                    {% endif %}
 
+                </div>
 
-                        <!-- Result -->
+            {% endfor %}
 
-                        <td>
+        {% else %}
 
-                            {% if check.success %}
+            <div class="log-line">
+                No requests recorded yet.
+            </div>
 
-                                Success
+        {% endif %}
 
-                            {% else %}
+    </div>
 
-                                Failed
-
-                            {% endif %}
-
-                        </td>
-
-
-                        <!-- Error -->
-
-                        <td>
-
-                            {% if check.error %}
-
-                                {{ check.error }}
-
-                            {% else %}
-
-                                —
-
-                            {% endif %}
-
-                        </td>
-
-                    </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    {% else %}
-
-        <p>
-            No request/response logs yet.
-        </p>
-
-    {% endif %}
+</div>
 
 
     <br>

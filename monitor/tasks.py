@@ -9,7 +9,10 @@ def check_monitor_task(monitor_id):
 
     monitor = Monitor.objects.get(id=monitor_id)
 
-    health_check = perform_health_check(monitor)
+    health_check = perform_health_check(
+    monitor,
+    check_type="celery"
+)
 
     return {
         "monitor_id": monitor_id,
