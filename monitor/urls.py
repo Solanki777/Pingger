@@ -15,4 +15,15 @@ path(
     views.monitor_details,
     name="monitor_details"
 ),
+path(
+    "<int:id>/edit/",
+    views.edit_monitor,
+    name="edit_monitor"
+),
+
+path(
+    "<int:id>/delete/",
+    views.delete_monitor,
+    name="delete_monitor"
+),
 ]

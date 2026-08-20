@@ -34,6 +34,10 @@
                     URL:
                     {{ monitor.url }}
                 </p>
+                <p>
+                    Monitor Interval :
+                {{monitor.check_interval}}
+                </p>
 
                 <p>
                     Status:
@@ -48,6 +52,22 @@
                     Added:
                     {{ monitor.created_at }}
                 </p>
+                <a href="{% url 'edit_monitor' monitor.id %}">
+                    Edit
+                </a>
+
+                <form method="POST"
+                    action="{% url 'delete_monitor' monitor.id %}"
+                    style="display:inline;">
+
+                    {% csrf_token %}
+
+                    <button type="submit"
+                            onclick="return confirm('Are you sure you want to delete this monitor?');">
+                        Delete
+                    </button>
+
+                </form>
 
             </div>
 

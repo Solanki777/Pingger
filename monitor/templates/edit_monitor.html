@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Monitor - Pingger</title>
+</head>
+
+<body>
+
+<h1>✏️ Edit Monitor</h1>
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    <label>
+        Name:
+    </label>
+
+    <input
+        type="text"
+        name="name"
+        value="{{ monitor.name }}"
+        required
+    >
+
+    <br><br>
+
+    <label>
+        Website URL:
+    </label>
+
+    <input
+        type="url"
+        name="url"
+        value="{{ monitor.url }}"
+        required
+    >
+
+    <br><br>
+
+    <label>
+        Check every:
+    </label>
+
+    <input
+        type="number"
+        name="check_interval"
+        min="1"
+        value="{{ monitor.check_interval }}"
+        required
+    >
+
+    <span>minutes</span>
+
+    <br><br>
+
+    <button type="submit">
+        Save Changes
+    </button>
+
+</form>
+
+<br>
+
+<a href="{% url 'monitor_list' %}">
+    Cancel
+</a>
+
+</body>
+</html>

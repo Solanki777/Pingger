@@ -3,6 +3,7 @@ from django.shortcuts import render,redirect
 from django.views.decorators.csrf import ensure_csrf_cookie
 from .models import Monitor
 from .services import perform_health_check
+from django.shortcuts import get_object_or_404, redirect, render
 
 
 def check_monitor(request, id):
@@ -25,6 +26,50 @@ def check_monitor(request, id):
             "health_check": health_check,
         }
     )
+
+
+def edit_monitor(request, id):
+
+    monitor = get_object_or_404(
+        Monitor,
+        id=id
+    )
+
+    if request.method == "POST":
+
+        monitor.name = request.POST.get("name")
+        monitor.url = request.POST.get("url")
+        monitor.check_interval = request.POST.get(
+            "check_interval"
+        )
+
+        monitor.save()
+
+        return redirect("monitor_list")
+
+    return render(
+        request,
+        "edit_monitor.html",
+        {
+            "monitor": monitor
+        }
+    )
+
+
+def delete_monitor(request, id):
+
+    monitor = get_object_or_404(
+        Monitor,
+        id=id
+    )
+
+    if request.method == "POST":
+
+        monitor.delete()
+
+        return redirect("monitor_list")
+
+    return redirect("monitor_list")
 
 
 
