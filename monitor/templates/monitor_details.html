@@ -93,12 +93,15 @@
 
 
     <!-- Latest Status -->
+    <!-- Latest Status -->
+
+<div id="latest-status-section">
 
     {% if latest_check %}
 
         <hr>
 
-        <h2>
+        <h2 id="latest-status">
             {% if latest_check.success %}
                 🟢 WEBSITE IS UP
             {% else %}
@@ -108,14 +111,14 @@
 
         <p>
             Status Code:
-            <strong>
+            <strong id="latest-status-code">
                 {{ latest_check.status_code|default:"—" }}
             </strong>
         </p>
 
         <p>
             Response Time:
-            <strong>
+            <strong id="latest-response-time">
                 {% if latest_check.response_time %}
                     {{ latest_check.response_time }} ms
                 {% else %}
@@ -126,27 +129,26 @@
 
         <p>
             Last Checked:
-            <strong>
+            <strong id="latest-checked">
                 {{ latest_check.checked_at }}
             </strong>
         </p>
 
-        {% if latest_check.error %}
-
-            <p>
-                Error:
-                <strong>
-                    {{ latest_check.error }}
-                </strong>
-            </p>
-
-        {% endif %}
+        <p id="latest-error-container"
+           {% if not latest_check.error %}style="display:none;"{% endif %}>
+            Error:
+            <strong id="latest-error">
+                {{ latest_check.error }}
+            </strong>
+        </p>
 
     {% else %}
 
         <hr>
 
-        <h2>⚪ NOT CHECKED YET</h2>
+        <h2 id="latest-status">
+            ⚪ NOT CHECKED YET
+        </h2>
 
         <p>
             No health checks have been performed yet.
@@ -154,7 +156,9 @@
 
     {% endif %}
 
+</div>
 
+    
     <!-- Health History -->
 <h2>Request / Response Logs</h2>
 
@@ -197,48 +201,191 @@
 
     const logsUrl = "{% url 'monitor_logs_api' monitor.id %}";
 
+
     function loadLogs() {
 
         fetch(logsUrl)
+
             .then(response => response.json())
+
             .then(data => {
 
+                /*
+                 * ==========================
+                 * UPDATE LATEST STATUS
+                 * ==========================
+                 */
+
+                const latest = data.latest;
+
+                if (latest) {
+
+                    const statusElement =
+                        document.getElementById(
+                            "latest-status"
+                        );
+
+                    const statusCodeElement =
+                        document.getElementById(
+                            "latest-status-code"
+                        );
+
+                    const responseTimeElement =
+                        document.getElementById(
+                            "latest-response-time"
+                        );
+
+                    const checkedElement =
+                        document.getElementById(
+                            "latest-checked"
+                        );
+
+                    const errorContainer =
+                        document.getElementById(
+                            "latest-error-container"
+                        );
+
+                    const errorElement =
+                        document.getElementById(
+                            "latest-error"
+                        );
+
+
+                    /*
+                     * Website status
+                     */
+
+                    if (latest.success) {
+
+                        statusElement.textContent =
+                            "🟢 WEBSITE IS UP";
+
+                    } else {
+
+                        statusElement.textContent =
+                            "🔴 WEBSITE IS DOWN";
+                    }
+
+
+                    /*
+                     * Status code
+                     */
+
+                    statusCodeElement.textContent =
+                        latest.status_code || "—";
+
+
+                    /*
+                     * Response time
+                     */
+
+                    responseTimeElement.textContent =
+                        latest.response_time !== null
+                            ? `${latest.response_time} ms`
+                            : "—";
+
+
+                    /*
+                     * Last checked
+                     */
+
+                    checkedElement.textContent =
+                        latest.checked_at;
+
+
+                    /*
+                     * Error
+                     */
+
+                    if (latest.error) {
+
+                        errorElement.textContent =
+                            latest.error;
+
+                        errorContainer.style.display =
+                            "block";
+
+                    } else {
+
+                        errorContainer.style.display =
+                            "none";
+                    }
+
+                }
+
+
+                /*
+                 * ==========================
+                 * UPDATE LOGS
+                 * ==========================
+                 */
+
                 const container =
-                    document.getElementById("log-content");
+                    document.getElementById(
+                        "log-content"
+                    );
 
                 container.innerHTML = "";
+
 
                 if (data.logs.length === 0) {
 
                     container.innerHTML =
-                        '<div class="log-line">No requests recorded yet.</div>';
+                        '<div class="log-line">' +
+                        'No requests recorded yet.' +
+                        '</div>';
 
                     return;
                 }
 
+
                 data.logs.forEach(log => {
 
                     const line =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
-                    line.className = "log-line";
+                    line.className =
+                        "log-line";
+
+
+                    /*
+                     * User vs Celery
+                     */
 
                     const source =
                         log.check_type === "celery"
                             ? "🤖 CELERY"
                             : "🧑 USER";
 
+
+                    /*
+                     * Status
+                     */
+
                     const status =
                         log.success
                             ? `🟢 ${log.status_code}`
                             : `🔴 ${log.status_code || "FAILED"}`;
+
+
+                    /*
+                     * Response time
+                     */
 
                     const responseTime =
                         log.response_time !== null
                             ? `${log.response_time} ms`
                             : "—";
 
+
+                    /*
+                     * Create log line
+                     */
+
                     line.innerHTML = `
+
                         <span class="log-time">
                             ${log.time}
                         </span>
@@ -269,18 +416,23 @@
 
                         ${
                             log.error
-                                ? `<span class="log-error">
-                                    ${log.error}
-                                   </span>`
+                                ? `
+                                    <span class="log-error">
+                                        ${log.error}
+                                    </span>
+                                  `
                                 : ""
                         }
+
                     `;
+
 
                     container.appendChild(line);
 
                 });
 
             })
+
             .catch(error => {
 
                 console.error(
@@ -291,11 +443,22 @@
             });
     }
 
-    // Load logs immediately
+
+    /*
+     * Load immediately
+     */
+
     loadLogs();
 
-    // Check for new logs every 5 seconds
-    setInterval(loadLogs, 5000);
+
+    /*
+     * Refresh every 5 seconds
+     */
+
+    setInterval(
+        loadLogs,
+        5000
+    );
 
 </script>
 </body>

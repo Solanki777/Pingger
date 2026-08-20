@@ -6,6 +6,8 @@ from .services import perform_health_check
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 
+
+
 def monitor_logs_api(request, id):
 
     monitor = get_object_or_404(
@@ -16,6 +18,8 @@ def monitor_logs_api(request, id):
     health_checks = monitor.health_checks.order_by(
         "-checked_at"
     )[:20]
+
+    latest_check = health_checks.first()
 
     logs = []
 
@@ -30,8 +34,23 @@ def monitor_logs_api(request, id):
             "error": check.error,
         })
 
+    latest = None
+
+    if latest_check:
+
+        latest = {
+            "status_code": latest_check.status_code,
+            "response_time": latest_check.response_time,
+            "success": latest_check.success,
+            "error": latest_check.error,
+            "checked_at": latest_check.checked_at.strftime(
+                "%Y-%m-%d %H:%M:%S"
+            ),
+        }
+
     return JsonResponse({
-        "logs": logs
+        "logs": logs,
+        "latest": latest,
     })
 
 def check_monitor(request, id):
