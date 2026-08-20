@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -134,3 +135,10 @@ MAILERS = {
 CELERY_BROKER_URL = "redis://localhost:6379/0"
 
 CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
+CELERY_BEAT_SCHEDULE = {
+    "check-monitor-every-5-minutes": {
+        "task": "monitor.tasks.check_all_monitors",
+        "schedule": 300.0,
+    },
+}

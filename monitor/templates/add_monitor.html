@@ -1,62 +1,60 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>Add Monitor - Pingger</title>
-</head>
+  </head>
 
-<body>
-
+  <body>
     <h1>🔔 Pingger</h1>
 
     <h2>Add Website Monitor</h2>
 
     <form method="POST">
+      {% csrf_token %}
 
-        {% csrf_token %}
+      <div>
+        <label for="name"> Website Name </label>
 
-        <div>
-            <label for="name">
-                Website Name
-            </label>
+        <input
+          type="text"
+          name="name"
+          id="name"
+          placeholder="My Portfolio"
+          required
+        />
+      </div>
 
-            <input
-                type="text"
-                name="name"
-                id="name"
-                placeholder="My Portfolio"
-                required
-            >
-        </div>
+      <br />
 
-        <br>
+      <div>
+        <label for="url"> Website URL </label>
 
-        <div>
-            <label for="url">
-                Website URL
-            </label>
+        <input
+          type="url"
+          name="url"
+          id="url"
+          placeholder="https://example.com"
+          required
+        />
+        <label for="check_interval"> Check every: </label>
 
-            <input
-                type="url"
-                name="url"
-                id="url"
-                placeholder="https://example.com"
-                required
-            >
-        </div>
+        <input
+          type="number"
+          name="check_interval"
+          id="check_interval"
+          min="1"
+          value="5"
+          required
+        />
+      </div>
 
-        <br>
+      <br />
 
-        <button type="submit">
-            Add Monitor
-        </button>
-
+      <button type="submit">Add Monitor</button>
     </form>
 
-    <br>
+    <br />
 
-    <a href="{% url 'monitor_list' %}">
-        View My Monitors
-    </a>
-
-</body>
+    <a href="{% url 'monitor_list' %}"> View My Monitors </a>
+  </body>
 </html>

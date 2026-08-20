@@ -11,6 +11,8 @@ class Monitor(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    check_interval = models.PositiveIntegerField(default=5)
+
     def __str__(self):
         return self.name
 
