@@ -5,6 +5,7 @@ from .models import Monitor
 from .services import perform_health_check
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
+from django.utils import timezone
 
 
 
@@ -26,7 +27,9 @@ def monitor_logs_api(request, id):
     for check in health_checks:
 
         logs.append({
-            "time": check.checked_at.strftime("%H:%M:%S"),
+            "time": timezone.localtime(
+    check.checked_at
+).strftime("%H:%M:%S"),
             "status_code": check.status_code,
             "response_time": check.response_time,
             "success": check.success,
@@ -43,16 +46,15 @@ def monitor_logs_api(request, id):
             "response_time": latest_check.response_time,
             "success": latest_check.success,
             "error": latest_check.error,
-            "checked_at": latest_check.checked_at.strftime(
-                "%Y-%m-%d %H:%M:%S"
-            ),
+            "checked_at": timezone.localtime(
+                latest_check.checked_at
+            ).strftime("%Y-%m-%d %H:%M:%S"),
         }
 
     return JsonResponse({
         "logs": logs,
         "latest": latest,
     })
-
 
 def toggle_monitor(request, id):
 
@@ -69,7 +71,6 @@ def toggle_monitor(request, id):
     monitor.save()
 
     if periodic_task:
-
         periodic_task.enabled = monitor.is_active
         periodic_task.save()
 
@@ -77,7 +78,6 @@ def toggle_monitor(request, id):
         "monitor_details",
         id=monitor.id
     )
-
 
 
 def check_monitor(request, id):

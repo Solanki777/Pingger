@@ -136,11 +136,5 @@ CELERY_BROKER_URL = "redis://localhost:6379/0"
 
 CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
-CELERY_BEAT_SCHEDULE = {
-    "check-monitor-every-5-minutes": {
-        "task": "monitor.tasks.check_all_monitors",
-        "schedule": 300.0,
-    },
-}
 
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
