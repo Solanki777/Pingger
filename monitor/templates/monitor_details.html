@@ -78,6 +78,15 @@
     <h1>🔔 Pingger</h1>
 
     <h2>{{ monitor.name }}</h2>
+    <p>
+    Status:
+
+    {% if monitor.is_active %}
+        <strong>🟢 Monitoring</strong>
+    {% else %}
+        <strong>⏸ Paused</strong>
+    {% endif %}
+</p>
 
     <p>
         URL:
@@ -191,6 +200,20 @@
     <a href="{% url 'check_monitor' monitor.id %}">
         🔄 Check Now
     </a>
+
+    {% if monitor.is_active %}
+
+    <a href="{% url 'toggle_monitor' monitor.id %}">
+        ⏸ Pause Monitoring
+    </a>
+
+{% else %}
+
+    <a href="{% url 'toggle_monitor' monitor.id %}">
+        ▶ Resume Monitoring
+    </a>
+
+{% endif %}
 
     <br><br>
 

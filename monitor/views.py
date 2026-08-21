@@ -53,6 +53,33 @@ def monitor_logs_api(request, id):
         "latest": latest,
     })
 
+
+def toggle_monitor(request, id):
+
+    monitor = get_object_or_404(
+        Monitor,
+        id=id
+    )
+
+    periodic_task = PeriodicTask.objects.filter(
+        name=f"monitor-{monitor.id}"
+    ).first()
+
+    monitor.is_active = not monitor.is_active
+    monitor.save()
+
+    if periodic_task:
+
+        periodic_task.enabled = monitor.is_active
+        periodic_task.save()
+
+    return redirect(
+        "monitor_details",
+        id=monitor.id
+    )
+
+
+
 def check_monitor(request, id):
 
     monitor = get_object_or_404(
