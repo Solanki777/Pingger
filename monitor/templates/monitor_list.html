@@ -330,25 +330,40 @@
 
                     </div>
                     <div>
-
-                        <small>Uptime (24h)</small>
+                        <small>Uptime 24h</small>
 
                         {% if monitor.uptime_24h is not None %}
-
                             <strong>
                                 {{ monitor.uptime_24h }}%
                             </strong>
-
                         {% else %}
-
-                            <strong>
-                                —
-                            </strong>
-
+                            <strong>—</strong>
                         {% endif %}
-
                     </div>
 
+                    <div>
+                        <small>Uptime 7d</small>
+
+                        {% if monitor.uptime_7d is not None %}
+                            <strong>
+                                {{ monitor.uptime_7d }}%
+                            </strong>
+                        {% else %}
+                            <strong>—</strong>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <small>Uptime 30d</small>
+
+                        {% if monitor.uptime_30d is not None %}
+                            <strong>
+                                {{ monitor.uptime_30d }}%
+                            </strong>
+                        {% else %}
+                            <strong>—</strong>
+                        {% endif %}
+                    </div>
                 </div>
 
 

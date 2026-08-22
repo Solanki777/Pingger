@@ -210,15 +210,28 @@ def monitor_list(request):
 
     monitors = Monitor.objects.all()
 
+   
     for monitor in monitors:
+
         monitor.latest_check = monitor.health_checks.order_by(
             "-checked_at"
         ).first()
 
         monitor.uptime_24h = calculate_uptime(
-        monitor,
-        hours=24
-    )
+            monitor,
+            hours=24
+        )
+
+        monitor.uptime_7d = calculate_uptime(
+            monitor,
+            hours=24 * 7
+        )
+
+        monitor.uptime_30d = calculate_uptime(
+            monitor,
+            hours=24 * 30
+        )        
+        
 
     total_monitors = monitors.count()
 
