@@ -15,6 +15,23 @@
             margin-bottom: 25px;
         }
 
+        .toggle-button {
+    padding: 7px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #f8f8f8;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.toggle-button:hover {
+    background: #eeeeee;
+}
+
+.toggle-button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
         /* Dashboard */
 
         .dashboard {
@@ -214,19 +231,13 @@
                     </h2>
 
 
+                   <strong class="monitor-status">
                     {% if monitor.is_active %}
-
-                        <strong>
-                            🟢 ACTIVE
-                        </strong>
-
+                        🟢 ACTIVE
                     {% else %}
-
-                        <strong>
-                            ⏸ PAUSED
-                        </strong>
-
+                        ⏸ PAUSED
                     {% endif %}
+                </strong>
 
                 </div>
 
@@ -353,34 +364,27 @@
                         🔄 Check Now
                     </a>
 
-
                     <a href="{% url 'monitor_details' monitor.id %}">
                         Details
                     </a>
-
 
                     <a href="{% url 'edit_monitor' monitor.id %}">
                         Edit
                     </a>
 
-
-                    {% if monitor.is_active %}
-
-                        <a href="{% url 'toggle_monitor' monitor.id %}">
+                    <button
+                        type="button"
+                        class="toggle-button"
+                        data-monitor-id="{{ monitor.id }}"
+                    >
+                        {% if monitor.is_active %}
                             ⏸ Pause
-                        </a>
-
-                    {% else %}
-
-                        <a href="{% url 'toggle_monitor' monitor.id %}">
+                        {% else %}
                             ▶ Resume
-                        </a>
-
-                    {% endif %}
+                        {% endif %}
+                    </button>
 
                 </div>
-
-            </div>
 
         {% endfor %}
 
@@ -391,6 +395,106 @@
         </p>
 
     {% endif %}
+
+
+    <script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const buttons =
+        document.querySelectorAll(".toggle-button");
+
+    buttons.forEach(function (button) {
+
+        button.addEventListener("click", async function () {
+
+            const monitorId =
+                button.dataset.monitorId;
+
+            button.disabled = true;
+
+            try {
+
+                const response = await fetch(
+                    `/monitors/${monitorId}/toggle/`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "HTTP " + response.status
+                    );
+                }
+
+                const data =
+                    await response.json();
+
+                console.log(
+                    "Toggle response:",
+                    data
+                );
+
+                if (!data.success) {
+                    throw new Error(
+                        "Toggle failed"
+                    );
+                }
+
+                const card =
+                    button.closest(".monitor-card");
+
+                const status =
+                    card.querySelector(
+                        ".monitor-status"
+                    );
+
+                if (data.is_active) {
+
+                    button.textContent =
+                        "⏸ Pause";
+
+                    status.textContent =
+                        "🟢 ACTIVE";
+
+                } else {
+
+                    button.textContent =
+                        "▶ Resume";
+
+                    status.textContent =
+                        "⏸ PAUSED";
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Toggle error:",
+                    error
+                );
+
+                alert(
+                    "Unable to change monitor status."
+                );
+
+            } finally {
+
+                button.disabled = false;
+
+            }
+
+        });
+
+    });
+
+});
+
+</script>
 
 </body>
 

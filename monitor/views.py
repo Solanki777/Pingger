@@ -74,10 +74,11 @@ def toggle_monitor(request, id):
         periodic_task.enabled = monitor.is_active
         periodic_task.save()
 
-    return redirect(
-        "monitor_details",
-        id=monitor.id
-    )
+    return JsonResponse({
+        "success": True,
+        "is_active": monitor.is_active,
+    })
+
 
 
 def check_monitor(request, id):
