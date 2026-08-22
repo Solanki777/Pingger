@@ -329,6 +329,25 @@
                         </strong>
 
                     </div>
+                    <div>
+
+                        <small>Uptime (24h)</small>
+
+                        {% if monitor.uptime_24h is not None %}
+
+                            <strong>
+                                {{ monitor.uptime_24h }}%
+                            </strong>
+
+                        {% else %}
+
+                            <strong>
+                                —
+                            </strong>
+
+                        {% endif %}
+
+                    </div>
 
                 </div>
 

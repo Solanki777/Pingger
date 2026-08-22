@@ -1,6 +1,7 @@
 import requests
 import time
-
+from datetime import timedelta
+from django.utils import timezone
 from .models import HealthCheck
 
 
@@ -61,3 +62,33 @@ def perform_health_check(monitor, check_type="user"):
             success=False,
             error=str(e)
         )
+
+
+    
+def calculate_uptime(monitor, hours=24):
+    """
+    Calculate uptime percentage based on health checks
+    recorded within the given time period.
+    """
+
+    since = timezone.now() - timedelta(hours=hours)
+
+    checks = HealthCheck.objects.filter(
+        monitor=monitor,
+        checked_at__gte=since
+    )
+
+    total_checks = checks.count()
+
+    if total_checks == 0:
+        return None
+
+    successful_checks = checks.filter(
+        success=True
+    ).count()
+
+    uptime = (
+        successful_checks / total_checks
+    ) * 100
+
+    return round(uptime, 2)

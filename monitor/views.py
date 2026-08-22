@@ -2,7 +2,10 @@ from django.shortcuts import render,redirect
 import json
 from django_celery_beat.models import IntervalSchedule, PeriodicTask
 from .models import Monitor
-from .services import perform_health_check
+from .services import (
+    perform_health_check,
+    calculate_uptime,
+)
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from django.utils import timezone
@@ -211,6 +214,11 @@ def monitor_list(request):
         monitor.latest_check = monitor.health_checks.order_by(
             "-checked_at"
         ).first()
+
+        monitor.uptime_24h = calculate_uptime(
+        monitor,
+        hours=24
+    )
 
     total_monitors = monitors.count()
 
