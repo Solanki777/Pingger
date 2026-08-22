@@ -79,14 +79,18 @@
 
     <h2>{{ monitor.name }}</h2>
     <p>
-    Status:
+        Status:
 
-    {% if monitor.is_active %}
-        <strong>🟢 Monitoring</strong>
-    {% else %}
-        <strong>⏸ Paused</strong>
-    {% endif %}
-</p>
+        <strong id="monitor-status">
+
+            {% if monitor.is_active %}
+                🟢 Monitoring
+            {% else %}
+                ⏸ Paused
+            {% endif %}
+
+        </strong>
+    </p>
 
     <p>
         URL:
@@ -199,20 +203,18 @@
     <a href="{% url 'check_monitor' monitor.id %}">
         🔄 Check Now
     </a>
-
+    <button
+    type="button"
+    id="toggle-monitor-button"
+    data-monitor-id="{{ monitor.id }}"
+>
     {% if monitor.is_active %}
-
-    <a href="{% url 'toggle_monitor' monitor.id %}">
         ⏸ Pause Monitoring
-    </a>
-
-{% else %}
-
-    <a href="{% url 'toggle_monitor' monitor.id %}">
+    {% else %}
         ▶ Resume Monitoring
-    </a>
+    {% endif %}
+    </button>
 
-{% endif %}
 
     <br><br>
 
@@ -220,267 +222,103 @@
         ← Back to Monitors
     </a>
 <script>
+    const toggleButton =
+    document.getElementById(
+        "toggle-monitor-button"
+    );
 
-    const logsUrl = "{% url 'monitor_logs_api' monitor.id %}";
-
-
-    function loadLogs() {
-
-        fetch(logsUrl)
-
-            .then(response => response.json())
-
-            .then(data => {
-
-                /*
-                 * ==========================
-                 * UPDATE LATEST STATUS
-                 * ==========================
-                 */
-
-                const latest = data.latest;
-
-                if (latest) {
-
-                    const statusElement =
-                        document.getElementById(
-                            "latest-status"
-                        );
-
-                    const statusCodeElement =
-                        document.getElementById(
-                            "latest-status-code"
-                        );
-
-                    const responseTimeElement =
-                        document.getElementById(
-                            "latest-response-time"
-                        );
-
-                    const checkedElement =
-                        document.getElementById(
-                            "latest-checked"
-                        );
-
-                    const errorContainer =
-                        document.getElementById(
-                            "latest-error-container"
-                        );
-
-                    const errorElement =
-                        document.getElementById(
-                            "latest-error"
-                        );
+const monitorStatus =
+    document.getElementById(
+        "monitor-status"
+    );
 
 
-                    /*
-                     * Website status
-                     */
+toggleButton.addEventListener(
+    "click",
+    async function () {
 
-                    if (latest.success) {
+        const monitorId =
+            toggleButton.dataset.monitorId;
 
-                        statusElement.textContent =
-                            "🟢 WEBSITE IS UP";
+        toggleButton.disabled = true;
 
-                    } else {
+        try {
 
-                        statusElement.textContent =
-                            "🔴 WEBSITE IS DOWN";
+            const response = await fetch(
+                `/monitors/${monitorId}/toggle/`,
+                {
+                    method: "GET",
+                    headers: {
+                        "X-Requested-With":
+                            "XMLHttpRequest"
                     }
-
-
-                    /*
-                     * Status code
-                     */
-
-                    statusCodeElement.textContent =
-                        latest.status_code || "—";
-
-
-                    /*
-                     * Response time
-                     */
-
-                    responseTimeElement.textContent =
-                        latest.response_time !== null
-                            ? `${latest.response_time} ms`
-                            : "—";
-
-
-                    /*
-                     * Last checked
-                     */
-
-                    checkedElement.textContent =
-                        latest.checked_at;
-
-
-                    /*
-                     * Error
-                     */
-
-                    if (latest.error) {
-
-                        errorElement.textContent =
-                            latest.error;
-
-                        errorContainer.style.display =
-                            "block";
-
-                    } else {
-
-                        errorContainer.style.display =
-                            "none";
-                    }
-
                 }
+            );
 
+            if (!response.ok) {
 
-                /*
-                 * ==========================
-                 * UPDATE LOGS
-                 * ==========================
-                 */
-
-                const container =
-                    document.getElementById(
-                        "log-content"
-                    );
-
-                container.innerHTML = "";
-
-
-                if (data.logs.length === 0) {
-
-                    container.innerHTML =
-                        '<div class="log-line">' +
-                        'No requests recorded yet.' +
-                        '</div>';
-
-                    return;
-                }
-
-
-                data.logs.forEach(log => {
-
-                    const line =
-                        document.createElement(
-                            "div"
-                        );
-
-                    line.className =
-                        "log-line";
-
-
-                    /*
-                     * User vs Celery
-                     */
-
-                    const source =
-                        log.check_type === "celery"
-                            ? "🤖 CELERY"
-                            : "🧑 USER";
-
-
-                    /*
-                     * Status
-                     */
-
-                    const status =
-                        log.success
-                            ? `🟢 ${log.status_code}`
-                            : `🔴 ${log.status_code || "FAILED"}`;
-
-
-                    /*
-                     * Response time
-                     */
-
-                    const responseTime =
-                        log.response_time !== null
-                            ? `${log.response_time} ms`
-                            : "—";
-
-
-                    /*
-                     * Create log line
-                     */
-
-                    line.innerHTML = `
-
-                        <span class="log-time">
-                            ${log.time}
-                        </span>
-
-                        &nbsp;
-
-                        <span>
-                            ${source}
-                        </span>
-
-                        &nbsp;
-
-                        <span>
-                            GET / HTTP/1.1
-                        </span>
-
-                        &nbsp;
-
-                        <span>
-                            ${status}
-                        </span>
-
-                        &nbsp;
-
-                        <span class="log-response">
-                            ${responseTime}
-                        </span>
-
-                        ${
-                            log.error
-                                ? `
-                                    <span class="log-error">
-                                        ${log.error}
-                                    </span>
-                                  `
-                                : ""
-                        }
-
-                    `;
-
-
-                    container.appendChild(line);
-
-                });
-
-            })
-
-            .catch(error => {
-
-                console.error(
-                    "Failed to load monitor logs:",
-                    error
+                throw new Error(
+                    "HTTP " + response.status
                 );
 
-            });
+            }
+
+            const data =
+                await response.json();
+
+            console.log(
+                "Toggle response:",
+                data
+            );
+
+            if (!data.success) {
+
+                throw new Error(
+                    "Toggle failed"
+                );
+
+            }
+
+
+            if (data.is_active) {
+
+                monitorStatus.textContent =
+                    "🟢 Monitoring";
+
+                toggleButton.textContent =
+                    "⏸ Pause Monitoring";
+
+            } else {
+
+                monitorStatus.textContent =
+                    "⏸ Paused";
+
+                toggleButton.textContent =
+                    "▶ Resume Monitoring";
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Toggle error:",
+                error
+            );
+
+            alert(
+                "Unable to change monitor status."
+            );
+
+        } finally {
+
+            toggleButton.disabled = false;
+
+        }
+
     }
+);
 
-
-    /*
-     * Load immediately
-     */
-
-    loadLogs();
-
-
-    /*
-     * Refresh every 5 seconds
-     */
-
-    setInterval(
-        loadLogs,
-        5000
-    );
+    
 
 </script>
 </body>
