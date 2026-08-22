@@ -221,106 +221,437 @@
     <a href="{% url 'monitor_list' %}">
         ← Back to Monitors
     </a>
-<script>
+    <script>
+
+    /*
+     * =====================================================
+     * PAUSE / RESUME MONITOR
+     * =====================================================
+     */
+
     const toggleButton =
-    document.getElementById(
-        "toggle-monitor-button"
-    );
+        document.getElementById(
+            "toggle-monitor-button"
+        );
 
-const monitorStatus =
-    document.getElementById(
-        "monitor-status"
-    );
+    const monitorStatus =
+        document.getElementById(
+            "monitor-status"
+        );
 
 
-toggleButton.addEventListener(
-    "click",
-    async function () {
+    toggleButton.addEventListener(
+        "click",
+        async function () {
 
-        const monitorId =
-            toggleButton.dataset.monitorId;
+            const monitorId =
+                toggleButton.dataset.monitorId;
 
-        toggleButton.disabled = true;
+            toggleButton.disabled = true;
 
-        try {
+            try {
 
-            const response = await fetch(
-                `/monitors/${monitorId}/toggle/`,
-                {
-                    method: "GET",
-                    headers: {
-                        "X-Requested-With":
-                            "XMLHttpRequest"
+                const response = await fetch(
+                    `/monitors/${monitorId}/toggle/`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "X-Requested-With":
+                                "XMLHttpRequest"
+                        }
                     }
+                );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "HTTP " + response.status
+                    );
+
                 }
-            );
 
-            if (!response.ok) {
 
-                throw new Error(
-                    "HTTP " + response.status
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    "Toggle response:",
+                    data
                 );
 
-            }
 
-            const data =
-                await response.json();
+                if (!data.success) {
 
-            console.log(
-                "Toggle response:",
-                data
-            );
+                    throw new Error(
+                        "Toggle failed"
+                    );
 
-            if (!data.success) {
+                }
 
-                throw new Error(
-                    "Toggle failed"
+
+                /*
+                 * Update monitor status
+                 */
+
+                if (data.is_active) {
+
+                    monitorStatus.textContent =
+                        "🟢 Monitoring";
+
+                    toggleButton.textContent =
+                        "⏸ Pause Monitoring";
+
+                } else {
+
+                    monitorStatus.textContent =
+                        "⏸ Paused";
+
+                    toggleButton.textContent =
+                        "▶ Resume Monitoring";
+
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "Toggle error:",
+                    error
                 );
 
-            }
+                alert(
+                    "Unable to change monitor status."
+                );
 
+            } finally {
 
-            if (data.is_active) {
-
-                monitorStatus.textContent =
-                    "🟢 Monitoring";
-
-                toggleButton.textContent =
-                    "⏸ Pause Monitoring";
-
-            } else {
-
-                monitorStatus.textContent =
-                    "⏸ Paused";
-
-                toggleButton.textContent =
-                    "▶ Resume Monitoring";
+                toggleButton.disabled = false;
 
             }
-
-        } catch (error) {
-
-            console.error(
-                "Toggle error:",
-                error
-            );
-
-            alert(
-                "Unable to change monitor status."
-            );
-
-        } finally {
-
-            toggleButton.disabled = false;
 
         }
+    );
+
+
+    /*
+     * =====================================================
+     * LIVE LOGS
+     * =====================================================
+     */
+
+    const logsUrl =
+        "{% url 'monitor_logs_api' monitor.id %}";
+
+
+    function loadLogs() {
+
+        fetch(logsUrl)
+
+            .then(response => {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "HTTP " + response.status
+                    );
+
+                }
+
+                return response.json();
+
+            })
+
+            .then(data => {
+
+                /*
+                 * =================================================
+                 * UPDATE LATEST STATUS
+                 * =================================================
+                 */
+
+                const latest = data.latest;
+
+
+                if (latest) {
+
+                    const statusElement =
+                        document.getElementById(
+                            "latest-status"
+                        );
+
+
+                    const statusCodeElement =
+                        document.getElementById(
+                            "latest-status-code"
+                        );
+
+
+                    const responseTimeElement =
+                        document.getElementById(
+                            "latest-response-time"
+                        );
+
+
+                    const checkedElement =
+                        document.getElementById(
+                            "latest-checked"
+                        );
+
+
+                    const errorContainer =
+                        document.getElementById(
+                            "latest-error-container"
+                        );
+
+
+                    const errorElement =
+                        document.getElementById(
+                            "latest-error"
+                        );
+
+
+                    /*
+                     * Website status
+                     */
+
+                    if (latest.success) {
+
+                        statusElement.textContent =
+                            "🟢 WEBSITE IS UP";
+
+                    } else {
+
+                        statusElement.textContent =
+                            "🔴 WEBSITE IS DOWN";
+
+                    }
+
+
+                    /*
+                     * Status code
+                     */
+
+                    statusCodeElement.textContent =
+                        latest.status_code ?? "—";
+
+
+                    /*
+                     * Response time
+                     */
+
+                    responseTimeElement.textContent =
+                        latest.response_time !== null
+                            ? `${latest.response_time} ms`
+                            : "—";
+
+
+                    /*
+                     * Last checked
+                     */
+
+                    checkedElement.textContent =
+                        latest.checked_at;
+
+
+                    /*
+                     * Error
+                     */
+
+                    if (latest.error) {
+
+                        errorElement.textContent =
+                            latest.error;
+
+                        errorContainer.style.display =
+                            "block";
+
+                    } else {
+
+                        errorContainer.style.display =
+                            "none";
+
+                    }
+
+                }
+
+
+                /*
+                 * =================================================
+                 * UPDATE REQUEST / RESPONSE LOGS
+                 * =================================================
+                 */
+
+                const container =
+                    document.getElementById(
+                        "log-content"
+                    );
+
+
+                container.innerHTML = "";
+
+
+                /*
+                 * No logs
+                 */
+
+                if (
+                    !data.logs ||
+                    data.logs.length === 0
+                ) {
+
+                    container.innerHTML =
+                        '<div class="log-line">' +
+                        'No requests recorded yet.' +
+                        '</div>';
+
+                    return;
+
+                }
+
+
+                /*
+                 * Create every log row
+                 */
+
+                data.logs.forEach(log => {
+
+                    const line =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    line.className =
+                        "log-line";
+
+
+                    /*
+                     * USER vs CELERY
+                     */
+
+                    const source =
+                        log.check_type === "celery"
+                            ? "🤖 CELERY"
+                            : "🧑 USER";
+
+
+                    /*
+                     * Success / Failed
+                     */
+
+                    const status =
+                        log.success
+                            ? `🟢 ${log.status_code}`
+                            : `🔴 ${log.status_code ?? "FAILED"}`;
+
+
+                    /*
+                     * Response time
+                     */
+
+                    const responseTime =
+                        log.response_time !== null
+                            ? `${log.response_time} ms`
+                            : "—";
+
+
+                    /*
+                     * Error
+                     */
+
+                    const error =
+                        log.error
+                            ? `
+                                &nbsp;
+
+                                <span class="log-error">
+                                    ${log.error}
+                                </span>
+                              `
+                            : "";
+
+
+                    /*
+                     * Build log row
+                     */
+
+                    line.innerHTML = `
+
+                        <span class="log-time">
+                            ${log.time}
+                        </span>
+
+                        &nbsp;
+
+                        <span>
+                            ${source}
+                        </span>
+
+                        &nbsp;
+
+                        <span>
+                            GET / HTTP/1.1
+                        </span>
+
+                        &nbsp;
+
+                        <span>
+                            ${status}
+                        </span>
+
+                        &nbsp;
+
+                        <span class="log-response">
+                            ${responseTime}
+                        </span>
+
+                        ${error}
+
+                    `;
+
+
+                    container.appendChild(line);
+
+                });
+
+            })
+
+            .catch(error => {
+
+                console.error(
+                    "Failed to load monitor logs:",
+                    error
+                );
+
+            });
 
     }
-);
 
-    
+
+    /*
+     * =====================================================
+     * INITIAL LOG LOAD
+     * =====================================================
+     */
+
+    loadLogs();
+
+
+    /*
+     * =====================================================
+     * REFRESH LOGS EVERY 5 SECONDS
+     * =====================================================
+     */
+
+    setInterval(
+        loadLogs,
+        5000
+    );
 
 </script>
+    
 </body>
 
 </html>
