@@ -3,10 +3,77 @@
 <head>
     <title>Monitors - Pingger</title>
 </head>
+<style>
+    .dashboard {
+    display: flex;
+    gap: 15px;
+    margin: 25px 0;
+    flex-wrap: wrap;
+}
+
+.card {
+    min-width: 160px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.card-title {
+    font-size: 13px;
+    color: #666;
+    font-weight: bold;
+}
+
+.card-value {
+    font-size: 32px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+</style>
 
 <body>
-
+    
     <h1>🔔 Pingger</h1>
+    <div class="dashboard">
+
+    <div class="card">
+        <div class="card-title">TOTAL MONITORS</div>
+        <div class="card-value">
+            {{ total_monitors }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">ACTIVE</div>
+        <div class="card-value">
+            {{ active_monitors }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">PAUSED</div>
+        <div class="card-value">
+            {{ paused_monitors }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">UP</div>
+        <div class="card-value">
+            {{ up_monitors }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">DOWN</div>
+        <div class="card-value">
+            {{ down_monitors }}
+        </div>
+    </div>
+
+</div>
+
 
     <h2>My Monitors</h2>
 
