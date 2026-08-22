@@ -1,154 +1,397 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Monitors - Pingger</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f6f7f9;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+        }
+
+        /* Dashboard */
+
+        .dashboard {
+            display: flex;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            min-width: 160px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .card-title {
+            font-size: 13px;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .card-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        /* Monitor Card */
+
+        .monitor-card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            background: white;
+        }
+
+        .monitor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .monitor-header h2 {
+            margin: 0;
+        }
+
+        .monitor-stats {
+            display: flex;
+            gap: 50px;
+            margin: 20px 0;
+        }
+
+        .monitor-stats div {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .monitor-stats small {
+            color: #777;
+        }
+
+        .monitor-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .monitor-actions a {
+            text-decoration: none;
+            padding: 7px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f8f8f8;
+        }
+
+        .add-monitor {
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+    </style>
+
 </head>
-<style>
-    .dashboard {
-    display: flex;
-    gap: 15px;
-    margin: 25px 0;
-    flex-wrap: wrap;
-}
-
-.card {
-    min-width: 160px;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background: #fff;
-}
-
-.card-title {
-    font-size: 13px;
-    color: #666;
-    font-weight: bold;
-}
-
-.card-value {
-    font-size: 32px;
-    font-weight: bold;
-    margin-top: 8px;
-}
-</style>
 
 <body>
-    
+
     <h1>🔔 Pingger</h1>
+
+
+    <!-- Dashboard -->
+
     <div class="dashboard">
 
-    <div class="card">
-        <div class="card-title">TOTAL MONITORS</div>
-        <div class="card-value">
-            {{ total_monitors }}
+        <div class="card">
+            <div class="card-title">
+                TOTAL MONITORS
+            </div>
+
+            <div class="card-value">
+                {{ total_monitors }}
+            </div>
         </div>
+
+
+        <div class="card">
+            <div class="card-title">
+                ACTIVE
+            </div>
+
+            <div class="card-value">
+                {{ active_monitors }}
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="card-title">
+                PAUSED
+            </div>
+
+            <div class="card-value">
+                {{ paused_monitors }}
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="card-title">
+                UP
+            </div>
+
+            <div class="card-value">
+                {{ up_monitors }}
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="card-title">
+                DOWN
+            </div>
+
+            <div class="card-value">
+                {{ down_monitors }}
+            </div>
+        </div>
+
     </div>
 
-    <div class="card">
-        <div class="card-title">ACTIVE</div>
-        <div class="card-value">
-            {{ active_monitors }}
-        </div>
-    </div>
 
-    <div class="card">
-        <div class="card-title">PAUSED</div>
-        <div class="card-value">
-            {{ paused_monitors }}
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-title">UP</div>
-        <div class="card-value">
-            {{ up_monitors }}
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-title">DOWN</div>
-        <div class="card-value">
-            {{ down_monitors }}
-        </div>
-    </div>
-
-</div>
-
+    <!-- Monitors -->
 
     <h2>My Monitors</h2>
 
-    <a href="{% url 'add_monitor' %}">
+    <a
+        class="add-monitor"
+        href="{% url 'add_monitor' %}"
+    >
         + Add Monitor
     </a>
 
     <hr>
 
+
     {% if monitors %}
 
         {% for monitor in monitors %}
 
-            <div>
-                <a href="{% url 'check_monitor' monitor.id %}">
-    Check Now
-</a>
-<a href="{% url 'monitor_details' monitor.id %}">
-    View Details
-</a>
+            <div class="monitor-card">
 
-                <h3>{{ monitor.name }}</h3>
+                <!-- Header -->
 
-                <p>
-                    URL:
-                    {{ monitor.url }}
-                </p>
-                <p>
-                    Monitor Interval :
-                {{monitor.check_interval}}
-                </p>
+                <div class="monitor-header">
 
-                <p>
-                    Status:
+                    <h2>
+
+                        {% if monitor.latest_check and monitor.latest_check.success %}
+
+                            🟢
+
+                        {% elif monitor.latest_check %}
+
+                            🔴
+
+                        {% else %}
+
+                            ⚪
+
+                        {% endif %}
+
+                        {{ monitor.name }}
+
+                    </h2>
+
+
                     {% if monitor.is_active %}
-                        🟢 Monitoring
+
+                        <strong>
+                            🟢 ACTIVE
+                        </strong>
+
                     {% else %}
-                        ⚪ Disabled
+
+                        <strong>
+                            ⏸ PAUSED
+                        </strong>
+
                     {% endif %}
-                </p>
+
+                </div>
+
+
+                <!-- URL -->
 
                 <p>
-                    Added:
-                    {{ monitor.created_at }}
+
+                    <a
+                        href="{{ monitor.url }}"
+                        target="_blank"
+                    >
+                        {{ monitor.url }}
+                    </a>
+
                 </p>
-                <a href="{% url 'edit_monitor' monitor.id %}">
-                    Edit
-                </a>
 
-                <form method="POST"
-                    action="{% url 'delete_monitor' monitor.id %}"
-                    style="display:inline;">
 
-                    {% csrf_token %}
+                <!-- Statistics -->
 
-                    <button type="submit"
-                            onclick="return confirm('Are you sure you want to delete this monitor?');">
-                        Delete
-                    </button>
+                <div class="monitor-stats">
 
-                </form>
+                    <div>
+
+                        <small>
+                            Website
+                        </small>
+
+
+                        {% if monitor.latest_check %}
+
+                            {% if monitor.latest_check.success %}
+
+                                <strong>
+                                    🟢 UP
+                                </strong>
+
+                            {% else %}
+
+                                <strong>
+                                    🔴 DOWN
+                                </strong>
+
+                            {% endif %}
+
+                        {% else %}
+
+                            <strong>
+                                —
+                            </strong>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            Response
+                        </small>
+
+
+                        {% if monitor.latest_check.response_time %}
+
+                            <strong>
+                                {{ monitor.latest_check.response_time }} ms
+                            </strong>
+
+                        {% else %}
+
+                            <strong>
+                                —
+                            </strong>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            Interval
+                        </small>
+
+                        <strong>
+                            {{ monitor.check_interval }} min
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Last Check -->
+
+                {% if monitor.latest_check %}
+
+                    <p>
+
+                        Last checked:
+
+                        <strong>
+                            {{ monitor.latest_check.checked_at }}
+                        </strong>
+
+                    </p>
+
+                {% else %}
+
+                    <p>
+                        No checks yet.
+                    </p>
+
+                {% endif %}
+
+
+                <!-- Actions -->
+
+                <div class="monitor-actions">
+
+                    <a href="{% url 'check_monitor' monitor.id %}">
+                        🔄 Check Now
+                    </a>
+
+
+                    <a href="{% url 'monitor_details' monitor.id %}">
+                        Details
+                    </a>
+
+
+                    <a href="{% url 'edit_monitor' monitor.id %}">
+                        Edit
+                    </a>
+
+
+                    {% if monitor.is_active %}
+
+                        <a href="{% url 'toggle_monitor' monitor.id %}">
+                            ⏸ Pause
+                        </a>
+
+                    {% else %}
+
+                        <a href="{% url 'toggle_monitor' monitor.id %}">
+                            ▶ Resume
+                        </a>
+
+                    {% endif %}
+
+                </div>
 
             </div>
-
-            <hr>
 
         {% endfor %}
 
     {% else %}
 
         <p>
-            You don't have any monitors yet.
+            No monitors added yet.
         </p>
 
     {% endif %}
 
 </body>
+
 </html>

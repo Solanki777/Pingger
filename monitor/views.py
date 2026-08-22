@@ -202,10 +202,14 @@ def add_monitor(request):
     )
 
 
-
 def monitor_list(request):
 
     monitors = Monitor.objects.all()
+
+    for monitor in monitors:
+        monitor.latest_check = monitor.health_checks.order_by(
+            "-checked_at"
+        ).first()
 
     total_monitors = monitors.count()
 
@@ -217,21 +221,19 @@ def monitor_list(request):
         is_active=False
     ).count()
 
-    up_monitors = 0
-    down_monitors = 0
+    up_monitors = sum(
+        1
+        for monitor in monitors
+        if monitor.latest_check
+        and monitor.latest_check.success
+    )
 
-    for monitor in monitors:
-
-        latest_check = monitor.health_checks.order_by(
-            "-checked_at"
-        ).first()
-
-        if latest_check:
-
-            if latest_check.success:
-                up_monitors += 1
-            else:
-                down_monitors += 1
+    down_monitors = sum(
+        1
+        for monitor in monitors
+        if monitor.latest_check
+        and not monitor.latest_check.success
+    )
 
     return render(
         request,
