@@ -43,6 +43,11 @@ path(
     views.monitor_logs_api,
     name="monitor_logs_api"
 ),
+path(
+    "monitors/<int:id>/graph/",
+    views.monitor_graph_api,
+    name="monitor_graph_api"
+),
 
 
 

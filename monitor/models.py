@@ -53,3 +53,18 @@ class HealthCheck(models.Model):
 
     def __str__(self):
         return f"{self.monitor.name} - {self.checked_at}"
+
+
+class MonitorState(models.Model):
+
+    monitor = models.ForeignKey(
+        Monitor,
+        on_delete=models.CASCADE,
+        related_name="state_history"
+    )
+
+    is_active = models.BooleanField()
+
+    changed_at = models.DateTimeField(
+        auto_now_add=True
+    )

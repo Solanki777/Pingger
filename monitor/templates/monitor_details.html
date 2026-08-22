@@ -3,7 +3,9 @@
 
 <head>
     <title>{{ monitor.name }} - Pingger</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        
     .log-terminal {
         background: #0d1117;
         color: #c9d1d9;
@@ -193,6 +195,30 @@
 
 </div>
 
+<hr>
+
+<h2>Performance</h2>
+
+<div style="max-width: 900px;">
+
+    <h3>Response Time</h3>
+
+    <canvas id="responseTimeChart"></canvas>
+
+</div>
+
+
+<br><br>
+
+
+<div style="max-width: 900px;">
+
+    <h3>Website Status</h3>
+
+    <canvas id="statusChart"></canvas>
+
+</div>
+
     <hr>
 
 
@@ -223,345 +249,273 @@
     </a>
     <script>
 
-    /*
-     * =====================================================
-     * PAUSE / RESUME MONITOR
-     * =====================================================
-     */
+let responseTimeChart = null;
+let statusChart = null;
 
-    const toggleButton =
-        document.getElementById(
-            "toggle-monitor-button"
+const logsUrl = "{% url 'monitor_logs_api' monitor.id %}";
+const graphUrl = "{% url 'monitor_graph_api' monitor.id %}";
+
+
+/* =====================================================
+   PAUSE / RESUME
+   ===================================================== */
+
+const toggleButton =
+    document.getElementById("toggle-monitor-button");
+
+const monitorStatus =
+    document.getElementById("monitor-status");
+
+
+toggleButton.addEventListener("click", async function () {
+
+    const monitorId =
+        toggleButton.dataset.monitorId;
+
+    toggleButton.disabled = true;
+
+    try {
+
+        const response = await fetch(
+            `/monitors/${monitorId}/toggle/`,
+            {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            }
         );
 
-    const monitorStatus =
-        document.getElementById(
-            "monitor-status"
+        if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+        }
+
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error("Toggle failed");
+        }
+
+        if (data.is_active) {
+
+            monitorStatus.textContent =
+                "🟢 Monitoring";
+
+            toggleButton.textContent =
+                "⏸ Pause Monitoring";
+
+        } else {
+
+            monitorStatus.textContent =
+                "⏸ Paused";
+
+            toggleButton.textContent =
+                "▶ Resume Monitoring";
+        }
+
+    } catch (error) {
+
+        console.error("Toggle error:", error);
+
+        alert(
+            "Unable to change monitor status."
         );
 
+    } finally {
 
-    toggleButton.addEventListener(
-        "click",
-        async function () {
+        toggleButton.disabled = false;
 
-            const monitorId =
-                toggleButton.dataset.monitorId;
+    }
 
-            toggleButton.disabled = true;
+});
 
-            try {
 
-                const response = await fetch(
-                    `/monitors/${monitorId}/toggle/`,
-                    {
-                        method: "GET",
-                        headers: {
-                            "X-Requested-With":
-                                "XMLHttpRequest"
-                        }
-                    }
+/* =====================================================
+   LIVE LOGS + LATEST STATUS
+   ===================================================== */
+
+function loadLogs() {
+
+    fetch(logsUrl)
+
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error(
+                    "HTTP " + response.status
                 );
+            }
+
+            return response.json();
+
+        })
+
+        .then(data => {
+
+            const latest = data.latest;
 
 
-                if (!response.ok) {
+            /* Latest status */
 
-                    throw new Error(
-                        "HTTP " + response.status
+            if (latest) {
+
+                const statusElement =
+                    document.getElementById(
+                        "latest-status"
                     );
 
-                }
-
-
-                const data =
-                    await response.json();
-
-
-                console.log(
-                    "Toggle response:",
-                    data
-                );
-
-
-                if (!data.success) {
-
-                    throw new Error(
-                        "Toggle failed"
+                const statusCodeElement =
+                    document.getElementById(
+                        "latest-status-code"
                     );
 
-                }
+                const responseTimeElement =
+                    document.getElementById(
+                        "latest-response-time"
+                    );
+
+                const checkedElement =
+                    document.getElementById(
+                        "latest-checked"
+                    );
+
+                const errorContainer =
+                    document.getElementById(
+                        "latest-error-container"
+                    );
+
+                const errorElement =
+                    document.getElementById(
+                        "latest-error"
+                    );
 
 
-                /*
-                 * Update monitor status
-                 */
+                if (latest.success) {
 
-                if (data.is_active) {
-
-                    monitorStatus.textContent =
-                        "🟢 Monitoring";
-
-                    toggleButton.textContent =
-                        "⏸ Pause Monitoring";
+                    statusElement.textContent =
+                        "🟢 WEBSITE IS UP";
 
                 } else {
 
-                    monitorStatus.textContent =
-                        "⏸ Paused";
-
-                    toggleButton.textContent =
-                        "▶ Resume Monitoring";
+                    statusElement.textContent =
+                        "🔴 WEBSITE IS DOWN";
 
                 }
 
 
-            } catch (error) {
+                statusCodeElement.textContent =
+                    latest.status_code ?? "—";
 
-                console.error(
-                    "Toggle error:",
-                    error
-                );
 
-                alert(
-                    "Unable to change monitor status."
-                );
+                responseTimeElement.textContent =
+                    latest.response_time !== null
+                        ? latest.response_time + " ms"
+                        : "—";
 
-            } finally {
 
-                toggleButton.disabled = false;
+                checkedElement.textContent =
+                    latest.checked_at;
+
+
+                if (latest.error) {
+
+                    errorElement.textContent =
+                        latest.error;
+
+                    errorContainer.style.display =
+                        "block";
+
+                } else {
+
+                    errorContainer.style.display =
+                        "none";
+
+                }
 
             }
 
-        }
-    );
 
+            /* Logs */
 
-    /*
-     * =====================================================
-     * LIVE LOGS
-     * =====================================================
-     */
+            const container =
+                document.getElementById(
+                    "log-content"
+                );
 
-    const logsUrl =
-        "{% url 'monitor_logs_api' monitor.id %}";
+            container.innerHTML = "";
 
 
-    function loadLogs() {
+            if (
+                !data.logs ||
+                data.logs.length === 0
+            ) {
 
-        fetch(logsUrl)
+                container.innerHTML =
+                    '<div class="log-line">' +
+                    'No requests recorded yet.' +
+                    '</div>';
 
-            .then(response => {
+                return;
+            }
 
-                if (!response.ok) {
 
-                    throw new Error(
-                        "HTTP " + response.status
-                    );
+            data.logs.forEach(log => {
 
-                }
+                const line =
+                    document.createElement("div");
 
-                return response.json();
+                line.className =
+                    "log-line";
 
-            })
 
-            .then(data => {
+                const source =
+                    log.check_type === "celery"
+                        ? "🤖 CELERY"
+                        : "🧑 USER";
 
-                /*
-                 * =================================================
-                 * UPDATE LATEST STATUS
-                 * =================================================
-                 */
 
-                const latest = data.latest;
+                const status =
+                    log.success
+                        ? `🟢 ${log.status_code}`
+                        : `🔴 ${log.status_code ?? "FAILED"}`;
 
 
-                if (latest) {
+                const responseTime =
+                    log.response_time !== null
+                        ? `${log.response_time} ms`
+                        : "—";
 
-                    const statusElement =
-                        document.getElementById(
-                            "latest-status"
-                        );
 
+                line.innerHTML = `
+                    <span class="log-time">
+                        ${log.time}
+                    </span>
 
-                    const statusCodeElement =
-                        document.getElementById(
-                            "latest-status-code"
-                        );
+                    &nbsp;
 
+                    <span>
+                        ${source}
+                    </span>
 
-                    const responseTimeElement =
-                        document.getElementById(
-                            "latest-response-time"
-                        );
+                    &nbsp;
 
+                    <span>
+                        GET / HTTP/1.1
+                    </span>
 
-                    const checkedElement =
-                        document.getElementById(
-                            "latest-checked"
-                        );
+                    &nbsp;
 
+                    <span>
+                        ${status}
+                    </span>
 
-                    const errorContainer =
-                        document.getElementById(
-                            "latest-error-container"
-                        );
+                    &nbsp;
 
+                    <span class="log-response">
+                        ${responseTime}
+                    </span>
 
-                    const errorElement =
-                        document.getElementById(
-                            "latest-error"
-                        );
-
-
-                    /*
-                     * Website status
-                     */
-
-                    if (latest.success) {
-
-                        statusElement.textContent =
-                            "🟢 WEBSITE IS UP";
-
-                    } else {
-
-                        statusElement.textContent =
-                            "🔴 WEBSITE IS DOWN";
-
-                    }
-
-
-                    /*
-                     * Status code
-                     */
-
-                    statusCodeElement.textContent =
-                        latest.status_code ?? "—";
-
-
-                    /*
-                     * Response time
-                     */
-
-                    responseTimeElement.textContent =
-                        latest.response_time !== null
-                            ? `${latest.response_time} ms`
-                            : "—";
-
-
-                    /*
-                     * Last checked
-                     */
-
-                    checkedElement.textContent =
-                        latest.checked_at;
-
-
-                    /*
-                     * Error
-                     */
-
-                    if (latest.error) {
-
-                        errorElement.textContent =
-                            latest.error;
-
-                        errorContainer.style.display =
-                            "block";
-
-                    } else {
-
-                        errorContainer.style.display =
-                            "none";
-
-                    }
-
-                }
-
-
-                /*
-                 * =================================================
-                 * UPDATE REQUEST / RESPONSE LOGS
-                 * =================================================
-                 */
-
-                const container =
-                    document.getElementById(
-                        "log-content"
-                    );
-
-
-                container.innerHTML = "";
-
-
-                /*
-                 * No logs
-                 */
-
-                if (
-                    !data.logs ||
-                    data.logs.length === 0
-                ) {
-
-                    container.innerHTML =
-                        '<div class="log-line">' +
-                        'No requests recorded yet.' +
-                        '</div>';
-
-                    return;
-
-                }
-
-
-                /*
-                 * Create every log row
-                 */
-
-                data.logs.forEach(log => {
-
-                    const line =
-                        document.createElement(
-                            "div"
-                        );
-
-
-                    line.className =
-                        "log-line";
-
-
-                    /*
-                     * USER vs CELERY
-                     */
-
-                    const source =
-                        log.check_type === "celery"
-                            ? "🤖 CELERY"
-                            : "🧑 USER";
-
-
-                    /*
-                     * Success / Failed
-                     */
-
-                    const status =
-                        log.success
-                            ? `🟢 ${log.status_code}`
-                            : `🔴 ${log.status_code ?? "FAILED"}`;
-
-
-                    /*
-                     * Response time
-                     */
-
-                    const responseTime =
-                        log.response_time !== null
-                            ? `${log.response_time} ms`
-                            : "—";
-
-
-                    /*
-                     * Error
-                     */
-
-                    const error =
+                    ${
                         log.error
                             ? `
                                 &nbsp;
@@ -570,87 +524,264 @@
                                     ${log.error}
                                 </span>
                               `
-                            : "";
+                            : ""
+                    }
+                `;
 
-
-                    /*
-                     * Build log row
-                     */
-
-                    line.innerHTML = `
-
-                        <span class="log-time">
-                            ${log.time}
-                        </span>
-
-                        &nbsp;
-
-                        <span>
-                            ${source}
-                        </span>
-
-                        &nbsp;
-
-                        <span>
-                            GET / HTTP/1.1
-                        </span>
-
-                        &nbsp;
-
-                        <span>
-                            ${status}
-                        </span>
-
-                        &nbsp;
-
-                        <span class="log-response">
-                            ${responseTime}
-                        </span>
-
-                        ${error}
-
-                    `;
-
-
-                    container.appendChild(line);
-
-                });
-
-            })
-
-            .catch(error => {
-
-                console.error(
-                    "Failed to load monitor logs:",
-                    error
-                );
+                container.appendChild(line);
 
             });
 
-    }
+        })
+
+        .catch(error => {
+
+            console.error(
+                "Failed to load monitor logs:",
+                error
+            );
+
+        });
+
+}
 
 
-    /*
-     * =====================================================
-     * INITIAL LOG LOAD
-     * =====================================================
-     */
+/* =====================================================
+   GRAPHS
+   ===================================================== */
 
-    loadLogs();
+function loadGraphs() {
+
+    fetch(graphUrl)
+
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error(
+                    "HTTP " + response.status
+                );
+            }
+
+            return response.json();
+
+        })
+
+        .then(data => {
+
+            const labels =
+                data.data.map(
+                    item => item.time
+                );
 
 
-    /*
-     * =====================================================
-     * REFRESH LOGS EVERY 5 SECONDS
-     * =====================================================
-     */
+            const responseTimes =
+                data.data.map(
+                    item => item.response_time
+                );
 
-    setInterval(
-        loadLogs,
-        5000
-    );
+
+            const statuses =
+                data.data.map(
+                    item => item.success ? 1 : 0
+                );
+
+
+            /* Response Time Chart */
+
+            const responseCanvas =
+                document.getElementById(
+                    "responseTimeChart"
+                );
+
+
+            if (!responseCanvas) {
+                return;
+            }
+
+
+            if (responseTimeChart) {
+
+                responseTimeChart.destroy();
+
+            }
+
+
+            responseTimeChart =
+                new Chart(
+                    responseCanvas,
+                    {
+                        type: "line",
+
+                        data: {
+
+                            labels: labels,
+
+                            datasets: [
+
+                                {
+                                    label:
+                                        "Response Time (ms)",
+
+                                    data:
+                                        responseTimes,
+
+                                    tension: 0.3,
+
+                                    spanGaps: true
+
+                                }
+
+                            ]
+
+                        },
+
+                        options: {
+
+                            responsive: true,
+
+                            scales: {
+
+                                y: {
+
+                                    beginAtZero: true
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+                );
+
+
+            /* Status Chart */
+
+            const statusCanvas =
+                document.getElementById(
+                    "statusChart"
+                );
+
+
+            if (!statusCanvas) {
+                return;
+            }
+
+
+            if (statusChart) {
+
+                statusChart.destroy();
+
+            }
+
+
+            statusChart =
+                new Chart(
+                    statusCanvas,
+                    {
+                        type: "line",
+
+                        data: {
+
+                            labels: labels,
+
+                            datasets: [
+
+                                {
+                                    label:
+                                        "Website Status",
+
+                                    data:
+                                        statuses,
+
+                                    stepped: true,
+
+                                    tension: 0,
+
+                                    spanGaps: true
+
+                                }
+
+                            ]
+
+                        },
+
+                        options: {
+
+                            responsive: true,
+
+                            scales: {
+
+                                y: {
+
+                                    min: 0,
+
+                                    max: 1,
+
+                                    ticks: {
+
+                                        stepSize: 1,
+
+                                        callback:
+                                            function(value) {
+
+                                                return value === 1
+                                                    ? "UP"
+                                                    : "DOWN";
+
+                                            }
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+                );
+
+        })
+
+        .catch(error => {
+
+            console.error(
+                "Failed to load graphs:",
+                error
+            );
+
+        });
+
+}
+
+
+/* =====================================================
+   START
+   ===================================================== */
+
+loadLogs();
+
+loadGraphs();
+
+
+/* Logs every 5 seconds */
+
+setInterval(
+    loadLogs,
+    5000
+);
+
+
+/* Graphs every 30 seconds */
+
+setInterval(
+    loadGraphs,
+    30000
+);
 
 </script>
+    
     
 </body>
 

@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 import json
 from django_celery_beat.models import IntervalSchedule, PeriodicTask
-from .models import Monitor
+from .models import Monitor,MonitorState
 from .services import (
     perform_health_check,
     calculate_uptime,
@@ -9,6 +9,8 @@ from .services import (
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from django.utils import timezone
+
+
 
 
 
@@ -59,6 +61,7 @@ def monitor_logs_api(request, id):
         "latest": latest,
     })
 
+
 def toggle_monitor(request, id):
 
     monitor = get_object_or_404(
@@ -77,10 +80,16 @@ def toggle_monitor(request, id):
         periodic_task.enabled = monitor.is_active
         periodic_task.save()
 
+    MonitorState.objects.create(
+        monitor=monitor,
+        is_active=monitor.is_active
+    )
+
     return JsonResponse({
         "success": True,
         "is_active": monitor.is_active,
     })
+
 
 
 
@@ -184,6 +193,11 @@ def add_monitor(request):
             name=name,
             url=url,
             check_interval=check_interval
+        )
+
+        MonitorState.objects.create(
+            monitor=monitor,
+            is_active=True
         )
 
         schedule, created = IntervalSchedule.objects.get_or_create(
@@ -292,3 +306,31 @@ def monitor_details(request, id):
             "latest_check": latest_check,
         }
     )
+
+
+def monitor_graph_api(request, id):
+
+    monitor = get_object_or_404(
+        Monitor,
+        id=id
+    )
+
+    health_checks = monitor.health_checks.order_by(
+        "checked_at"
+    )[:100]
+
+    data = []
+
+    for check in health_checks:
+
+        data.append({
+            "time": timezone.localtime(
+                check.checked_at
+            ).strftime("%H:%M"),
+            "response_time": check.response_time,
+            "success": check.success,
+        })
+
+    return JsonResponse({
+        "data": data
+    })
