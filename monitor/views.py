@@ -204,12 +204,45 @@ def add_monitor(request):
 
 
 def monitor_list(request):
+
     monitors = Monitor.objects.all()
+
+    total_monitors = monitors.count()
+
+    active_monitors = monitors.filter(
+        is_active=True
+    ).count()
+
+    paused_monitors = monitors.filter(
+        is_active=False
+    ).count()
+
+    up_monitors = 0
+    down_monitors = 0
+
+    for monitor in monitors:
+
+        latest_check = monitor.health_checks.order_by(
+            "-checked_at"
+        ).first()
+
+        if latest_check:
+
+            if latest_check.success:
+                up_monitors += 1
+            else:
+                down_monitors += 1
+
     return render(
         request,
         "monitor_list.html",
         {
-            "monitors": monitors
+            "monitors": monitors,
+            "total_monitors": total_monitors,
+            "active_monitors": active_monitors,
+            "paused_monitors": paused_monitors,
+            "up_monitors": up_monitors,
+            "down_monitors": down_monitors,
         }
     )
 
