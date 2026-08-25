@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
 class Monitor(models.Model):
 
     name = models.CharField(max_length=100)
@@ -13,7 +12,7 @@ class Monitor(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     check_interval = models.PositiveIntegerField(default=5)
-    
+
     user = models.ForeignKey(
     User,
     on_delete=models.CASCADE,
@@ -78,3 +77,42 @@ class MonitorState(models.Model):
     changed_at = models.DateTimeField(
         auto_now_add=True
     )
+
+
+class Alert(models.Model):
+
+    ALERT_TYPES = [
+        ("down", "Website Down"),
+        ("up", "Website Back Online"),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="alerts"
+    )
+
+    monitor = models.ForeignKey(
+        Monitor,
+        on_delete=models.CASCADE,
+        related_name="alerts"
+    )
+
+    alert_type = models.CharField(
+        max_length=20,
+        choices=ALERT_TYPES
+    )
+
+    message = models.TextField()
+
+    is_read = models.BooleanField(
+        default=False
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"{self.monitor.name} - {self.alert_type}"
+    
