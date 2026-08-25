@@ -8,7 +8,10 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>{% block title %}Pingger{% endblock %}</title>
+    <title>
+        {% block title %}Pingger{% endblock %}
+    </title>
+
 
     <style>
 
@@ -16,65 +19,109 @@
             box-sizing: border-box;
         }
 
+
         body {
+
             margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
             background: #f5f7fb;
+
             color: #222;
         }
 
-        /* NAVBAR */
+
+        /* =========================
+           NAVBAR
+        ========================= */
 
         .navbar {
+
             height: 64px;
+
             background: #ffffff;
-            border-bottom: 1px solid #e5e7eb;
+
+            border-bottom:
+                1px solid #e5e7eb;
 
             display: flex;
+
             align-items: center;
+
             justify-content: space-between;
 
             padding: 0 30px;
 
             position: sticky;
+
             top: 0;
+
             z-index: 1000;
         }
 
+
         .brand {
+
             text-decoration: none;
+
             color: #111;
 
             font-size: 21px;
+
             font-weight: bold;
         }
 
+
         .nav-right {
+
             display: flex;
+
             align-items: center;
+
             gap: 18px;
         }
 
+
         .nav-link {
+
             text-decoration: none;
+
             color: #444;
+
             font-size: 14px;
         }
 
+
         .nav-link:hover {
+
             color: #000;
         }
 
+
+        /* =========================
+           USER
+        ========================= */
+
         .user-info {
+
             display: flex;
+
             align-items: center;
+
             gap: 8px;
 
             font-size: 14px;
         }
 
+
         .user-avatar {
+
             width: 32px;
+
             height: 32px;
 
             border-radius: 50%;
@@ -82,14 +129,23 @@
             background: #e9eef6;
 
             display: flex;
+
             align-items: center;
+
             justify-content: center;
 
             font-size: 16px;
         }
 
+
+        /* =========================
+           LOGOUT
+        ========================= */
+
         .logout-button {
-            border: 1px solid #ddd;
+
+            border:
+                1px solid #ddd;
 
             background: white;
 
@@ -102,13 +158,212 @@
             font-size: 13px;
         }
 
+
         .logout-button:hover {
+
             background: #f3f3f3;
         }
 
-        /* PAGE */
+
+        /* =========================
+           ALERTS
+        ========================= */
+
+        .alert-wrapper {
+
+            position: relative;
+        }
+
+
+        .alert-button {
+
+            position: relative;
+
+            border: none;
+
+            background: transparent;
+
+            cursor: pointer;
+
+            font-size: 20px;
+
+            width: 36px;
+
+            height: 36px;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+        }
+
+
+        .alert-button:hover {
+
+            background: #f3f4f6;
+        }
+
+
+        .alert-badge {
+
+            position: absolute;
+
+            top: -2px;
+
+            right: -2px;
+
+            min-width: 17px;
+
+            height: 17px;
+
+            padding: 0 4px;
+
+            background: #ef4444;
+
+            color: white;
+
+            border-radius: 20px;
+
+            font-size: 10px;
+
+            font-weight: bold;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+        }
+
+
+        .alert-dropdown {
+
+            position: absolute;
+
+            top: 45px;
+
+            right: 0;
+
+            width: 360px;
+
+            background: white;
+
+            border:
+                1px solid #e5e7eb;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 10px 30px
+                rgba(0, 0, 0, 0.12);
+
+            display: none;
+
+            overflow: hidden;
+        }
+
+
+        .alert-dropdown.show {
+
+            display: block;
+        }
+
+
+        .alert-header {
+
+            padding: 15px;
+
+            font-size: 15px;
+
+            font-weight: bold;
+
+            border-bottom:
+                1px solid #eee;
+        }
+
+
+        .alert-list {
+
+            max-height: 400px;
+
+            overflow-y: auto;
+        }
+
+
+        .alert-item {
+
+            padding: 13px 15px;
+
+            border-bottom:
+                1px solid #f0f0f0;
+
+            cursor: pointer;
+        }
+
+
+        .alert-item:hover {
+
+            background: #f8fafc;
+        }
+
+
+        .alert-item.unread {
+
+            background: #f5f9ff;
+        }
+
+
+        .alert-title {
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+            margin-bottom: 5px;
+        }
+
+
+        .alert-message {
+
+            font-size: 12px;
+
+            color: #666;
+
+            line-height: 1.4;
+        }
+
+
+        .alert-time {
+
+            margin-top: 6px;
+
+            font-size: 11px;
+
+            color: #999;
+        }
+
+
+        .no-alerts {
+
+            padding: 25px;
+
+            text-align: center;
+
+            color: #999;
+
+            font-size: 13px;
+        }
+
+
+        /* =========================
+           PAGE
+        ========================= */
 
         .page-container {
+
             max-width: 1200px;
 
             margin: 0 auto;
@@ -116,7 +371,48 @@
             padding: 30px;
         }
 
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 600px) {
+
+            .navbar {
+
+                padding: 0 15px;
+            }
+
+
+            .nav-right {
+
+                gap: 10px;
+            }
+
+
+            .user-info span {
+
+                display: none;
+            }
+
+
+            .alert-dropdown {
+
+                width: 300px;
+
+                right: -80px;
+            }
+
+
+            .page-container {
+
+                padding: 20px;
+            }
+
+        }
+
     </style>
+
 
     {% block extra_css %}
     {% endblock %}
@@ -126,42 +422,135 @@
 
 <body>
 
-    <!-- NAVBAR -->
+
+    <!-- =========================
+         NAVBAR
+    ========================= -->
 
     <nav class="navbar">
+
+
+        <!-- BRAND -->
 
         <a
             href="{% url 'monitor_list' %}"
             class="brand"
         >
+
             🔔 Pingger
+
         </a>
 
 
         {% if user.is_authenticated %}
 
+
             <div class="nav-right">
+
+
+                <!-- MONITORS -->
 
                 <a
                     href="{% url 'monitor_list' %}"
                     class="nav-link"
                 >
+
                     Monitors
+
                 </a>
 
 
-                <div class="user-info">
+                <!-- =========================
+                     ALERT BUTTON
+                ========================= -->
 
-                    <div class="user-avatar">
-                        👤
+                <div class="alert-wrapper">
+
+
+                    <button
+                        type="button"
+                        class="alert-button"
+                        id="alertButton"
+                        aria-label="Notifications"
+                    >
+
+                        🔔
+
+
+                        <span
+                            class="alert-badge"
+                            id="alertBadge"
+                            style="display: none;"
+                        >
+
+                            0
+
+                        </span>
+
+                    </button>
+
+
+                    <!-- ALERT DROPDOWN -->
+
+                    <div
+                        class="alert-dropdown"
+                        id="alertDropdown"
+                    >
+
+
+                        <div class="alert-header">
+
+                            Alerts
+
+                        </div>
+
+
+                        <div
+                            id="alertList"
+                            class="alert-list"
+                        >
+
+                            <div class="no-alerts">
+
+                                No alerts
+
+                            </div>
+
+                        </div>
+
+
                     </div>
-
-                    <span>
-                        {{ user.email|default:user.username }}
-                    </span>
 
                 </div>
 
+
+                <!-- =========================
+                     USER
+                ========================= -->
+
+                <div class="user-info">
+
+
+                    <div class="user-avatar">
+
+                        👤
+
+                    </div>
+
+
+                    <span>
+
+                        {{ user.email|default:user.username }}
+
+                    </span>
+
+
+                </div>
+
+
+                <!-- =========================
+                     LOGOUT
+                ========================= -->
 
                 <form
                     method="post"
@@ -171,34 +560,517 @@
 
                     {% csrf_token %}
 
+
                     <button
                         type="submit"
                         class="logout-button"
                     >
+
                         Logout
+
                     </button>
 
                 </form>
 
+
             </div>
 
+
         {% endif %}
+
 
     </nav>
 
 
-    <!-- PAGE CONTENT -->
+    <!-- =========================
+         PAGE CONTENT
+    ========================= -->
 
     <main class="page-container">
+
 
         {% block content %}
         {% endblock %}
 
+
     </main>
 
 
+    <!-- =========================
+         EXTRA JAVASCRIPT
+    ========================= -->
+
     {% block extra_js %}
     {% endblock %}
+
+
+    <!-- =========================
+         ALERT JAVASCRIPT
+    ========================= -->
+
+    {% if user.is_authenticated %}
+
+    <script>
+
+
+        /*
+         * Alert elements
+         */
+
+        const alertButton =
+            document.getElementById(
+                "alertButton"
+            );
+
+
+        const alertDropdown =
+            document.getElementById(
+                "alertDropdown"
+            );
+
+
+        const alertBadge =
+            document.getElementById(
+                "alertBadge"
+            );
+
+
+        const alertList =
+            document.getElementById(
+                "alertList"
+            );
+
+
+        /*
+         * Make sure elements exist
+         */
+
+        if (
+            alertButton &&
+            alertDropdown &&
+            alertBadge &&
+            alertList
+        ) {
+
+
+            /*
+             * Open / close dropdown
+             */
+
+            alertButton.addEventListener(
+                "click",
+                function(event) {
+
+                    event.stopPropagation();
+
+                    alertDropdown.classList.toggle(
+                        "show"
+                    );
+
+                }
+            );
+
+
+            /*
+             * Prevent dropdown clicks from
+             * immediately closing it
+             */
+
+            alertDropdown.addEventListener(
+                "click",
+                function(event) {
+
+                    event.stopPropagation();
+
+                }
+            );
+
+
+            /*
+             * Close dropdown when clicking outside
+             */
+
+            document.addEventListener(
+                "click",
+                function() {
+
+                    alertDropdown.classList.remove(
+                        "show"
+                    );
+
+                }
+            );
+
+
+            /*
+             * Load alerts
+             */
+
+            function loadAlerts() {
+
+
+                fetch(
+                    "{% url 'alerts_api' %}"
+                )
+
+
+                .then(
+                    response => {
+
+                        if (!response.ok) {
+
+                            throw new Error(
+                                "Failed to load alerts"
+                            );
+
+                        }
+
+                        return response.json();
+
+                    }
+                )
+
+
+                .then(
+                    data => {
+
+
+                        /*
+                         * Unread count
+                         */
+
+                        if (
+                            data.unread_count &&
+                            data.unread_count > 0
+                        ) {
+
+                            alertBadge.style.display =
+                                "flex";
+
+
+                            alertBadge.textContent =
+                                data.unread_count;
+
+                        }
+
+                        else {
+
+                            alertBadge.style.display =
+                                "none";
+
+                        }
+
+
+                        /*
+                         * No alerts
+                         */
+
+                        if (
+                            !data.alerts ||
+                            data.alerts.length === 0
+                        ) {
+
+
+                            alertList.innerHTML = `
+
+                                <div class="no-alerts">
+
+                                    No alerts
+
+                                </div>
+
+                            `;
+
+
+                            return;
+
+                        }
+
+
+                        /*
+                         * Build alert list
+                         */
+
+                        alertList.innerHTML =
+                            data.alerts
+                                .map(
+                                    alert => {
+
+
+                                        const isDown =
+                                            alert.type ===
+                                            "down";
+
+
+                                        const icon =
+                                            isDown
+                                                ? "🔴"
+                                                : "🟢";
+
+
+                                        const title =
+                                            isDown
+                                                ? "Website Down"
+                                                : "Website Back Online";
+
+
+                                        return `
+
+                                            <div
+                                                class="alert-item ${
+                                                    alert.is_read
+                                                        ? ""
+                                                        : "unread"
+                                                }"
+                                                data-alert-id="${
+                                                    alert.id
+                                                }"
+                                            >
+
+
+                                                <div
+                                                    class="alert-title"
+                                                >
+
+                                                    ${icon}
+
+                                                    ${title}
+
+                                                </div>
+
+
+                                                <div
+                                                    class="alert-message"
+                                                >
+
+                                                    ${alert.monitor}
+
+                                                </div>
+
+
+                                                <div
+                                                    class="alert-time"
+                                                >
+
+                                                    ${alert.created_at}
+
+                                                </div>
+
+
+                                            </div>
+
+                                        `;
+
+                                    }
+                                )
+                                .join("");
+
+
+                        /*
+                         * Add click handlers
+                         */
+
+                        document
+                            .querySelectorAll(
+                                ".alert-item"
+                            )
+                            .forEach(
+                                item => {
+
+
+                                    item.addEventListener(
+                                        "click",
+                                        function() {
+
+
+                                            const alertId =
+                                                this.dataset.alertId;
+
+
+                                            markAlertRead(
+                                                alertId
+                                            );
+
+
+                                        }
+                                    );
+
+                                }
+                            );
+
+                    }
+                )
+
+
+                .catch(
+                    error => {
+
+                        console.error(
+                            "Failed to load alerts:",
+                            error
+                        );
+
+                    }
+                );
+
+            }
+
+
+            /*
+             * Mark alert as read
+             */
+
+            function markAlertRead(
+                alertId
+            ) {
+
+
+                fetch(
+                    `/alerts/${alertId}/read/`,
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            "X-CSRFToken":
+                                getCookie(
+                                    "csrftoken"
+                                ),
+
+                            "Content-Type":
+                                "application/json"
+
+                        }
+
+                    }
+                )
+
+
+                .then(
+                    response => {
+
+                        if (!response.ok) {
+
+                            throw new Error(
+                                "Failed to mark alert as read"
+                            );
+
+                        }
+
+                        return response.json();
+
+                    }
+                )
+
+
+                .then(
+                    () => {
+
+                        loadAlerts();
+
+                    }
+                )
+
+
+                .catch(
+                    error => {
+
+                        console.error(
+                            "Failed to mark alert as read:",
+                            error
+                        );
+
+                    }
+                );
+
+            }
+
+
+            /*
+             * Get CSRF cookie
+             */
+
+            function getCookie(
+                name
+            ) {
+
+
+                let cookieValue = null;
+
+
+                if (
+                    document.cookie &&
+                    document.cookie !== ""
+                ) {
+
+
+                    const cookies =
+                        document.cookie.split(
+                            ";"
+                        );
+
+
+                    for (
+                        let cookie of cookies
+                    ) {
+
+
+                        cookie =
+                            cookie.trim();
+
+
+                        if (
+                            cookie.startsWith(
+                                name + "="
+                            )
+                        ) {
+
+
+                            cookieValue =
+                                decodeURIComponent(
+                                    cookie.substring(
+                                        name.length + 1
+                                    )
+                                );
+
+
+                            break;
+
+                        }
+
+                    }
+
+                }
+
+
+                return cookieValue;
+
+            }
+
+
+            /*
+             * Initial load
+             */
+
+            loadAlerts();
+
+
+            /*
+             * Refresh alerts every 30 seconds
+             */
+
+            setInterval(
+                loadAlerts,
+                30000
+            );
+
+        }
+
+    </script>
+
+    {% endif %}
+
 
 </body>
 

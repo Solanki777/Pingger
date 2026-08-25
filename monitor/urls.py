@@ -14,6 +14,11 @@ urlpatterns = [
     name="check_monitor"
 ),
 
+path(
+    "alerts/",
+    views.alerts_api,
+    name="alerts_api"
+),
 
 path(
     "monitors/<int:id>/",
@@ -50,6 +55,10 @@ path(
     name="monitor_graph_api"
 ),
 
-
+path(
+    "alerts/<int:id>/read/",
+    views.mark_alert_read,
+    name="mark_alert_read"
+),
 
 ]

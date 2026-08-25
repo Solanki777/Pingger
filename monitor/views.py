@@ -5,8 +5,7 @@ from django_celery_beat.models import IntervalSchedule, PeriodicTask
 from django.http import JsonResponse
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-
-from .models import Monitor, MonitorState
+from .models import Monitor, MonitorState, Alert
 from .services import (
     perform_health_check,
     calculate_uptime,
@@ -378,4 +377,62 @@ def monitor_graph_api(request, id):
 
     return JsonResponse({
         "data": data
+    })
+
+
+@login_required
+def alerts_api(request):
+
+    alerts = Alert.objects.filter(
+        user=request.user
+    ).select_related(
+        "monitor"
+    ).order_by(
+        "-created_at"
+    )[:20]
+
+    data = []
+
+    for alert in alerts:
+
+        data.append({
+            "id": alert.id,
+
+            "monitor": alert.monitor.name,
+
+            "type": alert.alert_type,
+
+            "message": alert.message,
+
+            "is_read": alert.is_read,
+
+            "created_at": timezone.localtime(
+                alert.created_at
+            ).strftime("%Y-%m-%d %H:%M:%S"),
+        })
+
+    unread_count = Alert.objects.filter(
+        user=request.user,
+        is_read=False
+    ).count()
+
+    return JsonResponse({
+        "alerts": data,
+        "unread_count": unread_count,
+    })
+
+
+@login_required
+def mark_alert_read(request, id):
+
+    alert = get_object_or_404(
+        Alert,
+        id=id,
+        user=request.user
+    )
+
+    alert.delete()
+
+    return JsonResponse({
+        "success": True
     })
