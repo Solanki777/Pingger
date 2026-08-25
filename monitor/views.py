@@ -9,11 +9,12 @@ from .services import (
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 
 
 
 
-
+@login_required
 def monitor_logs_api(request, id):
 
     monitor = get_object_or_404(
@@ -61,7 +62,7 @@ def monitor_logs_api(request, id):
         "latest": latest,
     })
 
-
+@login_required
 def toggle_monitor(request, id):
 
     monitor = get_object_or_404(
@@ -92,7 +93,7 @@ def toggle_monitor(request, id):
 
 
 
-
+@login_required
 def check_monitor(request, id):
 
     monitor = get_object_or_404(
@@ -114,7 +115,7 @@ def check_monitor(request, id):
         }
     )
 
-
+@login_required
 def edit_monitor(request, id):
 
     monitor = get_object_or_404(
@@ -159,6 +160,7 @@ def edit_monitor(request, id):
         }
     )
 
+@login_required
 def delete_monitor(request, id):
 
     monitor = get_object_or_404(
@@ -179,6 +181,7 @@ def delete_monitor(request, id):
     return redirect("monitor_list")
 
 
+@login_required
 def add_monitor(request):
 
     if request.method == "POST":
@@ -220,6 +223,7 @@ def add_monitor(request):
     )
 
 
+@login_required
 def monitor_list(request):
 
     monitors = Monitor.objects.all()
@@ -286,7 +290,7 @@ def monitor_list(request):
 
 
 
-
+@login_required
 def monitor_details(request, id):
 
     monitor = Monitor.objects.get(id=id)
@@ -308,6 +312,7 @@ def monitor_details(request, id):
     )
 
 
+@login_required
 def monitor_graph_api(request, id):
 
     monitor = get_object_or_404(
