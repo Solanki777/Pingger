@@ -1,17 +1,16 @@
-from django.shortcuts import render,redirect
-import json
-from django_celery_beat.models import IntervalSchedule, PeriodicTask
-from .models import Monitor,MonitorState
-from .services import (
-    perform_health_check,
-    calculate_uptime,
-)
 from django.shortcuts import get_object_or_404, redirect, render
+import json
+
+from django_celery_beat.models import IntervalSchedule, PeriodicTask
 from django.http import JsonResponse
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 
-
+from .models import Monitor, MonitorState
+from .services import (
+    perform_health_check,
+    calculate_uptime,
+)
 
 
 @login_required
@@ -19,7 +18,8 @@ def monitor_logs_api(request, id):
 
     monitor = get_object_or_404(
         Monitor,
-        id=id
+        id=id,
+        user=request.user
     )
 
     health_checks = monitor.health_checks.order_by(
@@ -34,12 +34,17 @@ def monitor_logs_api(request, id):
 
         logs.append({
             "time": timezone.localtime(
-    check.checked_at
-).strftime("%H:%M:%S"),
+                check.checked_at
+            ).strftime("%H:%M:%S"),
+
             "status_code": check.status_code,
+
             "response_time": check.response_time,
+
             "success": check.success,
+
             "check_type": check.check_type,
+
             "error": check.error,
         })
 
@@ -49,9 +54,13 @@ def monitor_logs_api(request, id):
 
         latest = {
             "status_code": latest_check.status_code,
+
             "response_time": latest_check.response_time,
+
             "success": latest_check.success,
+
             "error": latest_check.error,
+
             "checked_at": timezone.localtime(
                 latest_check.checked_at
             ).strftime("%Y-%m-%d %H:%M:%S"),
@@ -62,12 +71,14 @@ def monitor_logs_api(request, id):
         "latest": latest,
     })
 
+
 @login_required
 def toggle_monitor(request, id):
 
     monitor = get_object_or_404(
         Monitor,
-        id=id
+        id=id,
+        user=request.user
     )
 
     periodic_task = PeriodicTask.objects.filter(
@@ -78,6 +89,7 @@ def toggle_monitor(request, id):
     monitor.save()
 
     if periodic_task:
+
         periodic_task.enabled = monitor.is_active
         periodic_task.save()
 
@@ -92,19 +104,19 @@ def toggle_monitor(request, id):
     })
 
 
-
 @login_required
 def check_monitor(request, id):
 
     monitor = get_object_or_404(
         Monitor,
-        id=id
+        id=id,
+        user=request.user
     )
 
     health_check = perform_health_check(
-    monitor,
-    check_type="user"
-)
+        monitor,
+        check_type="user"
+    )
 
     return render(
         request,
@@ -115,17 +127,20 @@ def check_monitor(request, id):
         }
     )
 
+
 @login_required
 def edit_monitor(request, id):
 
     monitor = get_object_or_404(
         Monitor,
-        id=id
+        id=id,
+        user=request.user
     )
 
     if request.method == "POST":
 
         monitor.name = request.POST.get("name")
+
         monitor.url = request.POST.get("url")
 
         new_interval = int(
@@ -137,17 +152,20 @@ def edit_monitor(request, id):
         monitor.save()
 
         periodic_task = PeriodicTask.objects.filter(
-        name=f"monitor-{monitor.id}"
+            name=f"monitor-{monitor.id}"
         ).first()
 
         if periodic_task:
 
-            schedule, created = IntervalSchedule.objects.get_or_create(
-                every=new_interval,
-                period=IntervalSchedule.MINUTES,
+            schedule, created = (
+                IntervalSchedule.objects.get_or_create(
+                    every=new_interval,
+                    period=IntervalSchedule.MINUTES,
+                )
             )
 
             periodic_task.interval = schedule
+
             periodic_task.save()
 
         return redirect("monitor_list")
@@ -160,12 +178,14 @@ def edit_monitor(request, id):
         }
     )
 
+
 @login_required
 def delete_monitor(request, id):
 
     monitor = get_object_or_404(
         Monitor,
-        id=id
+        id=id,
+        user=request.user
     )
 
     if request.method == "POST":
@@ -187,12 +207,15 @@ def add_monitor(request):
     if request.method == "POST":
 
         name = request.POST.get("name")
+
         url = request.POST.get("url")
+
         check_interval = int(
             request.POST.get("check_interval")
         )
 
         monitor = Monitor.objects.create(
+            user=request.user,
             name=name,
             url=url,
             check_interval=check_interval
@@ -203,17 +226,19 @@ def add_monitor(request):
             is_active=True
         )
 
-        schedule, created = IntervalSchedule.objects.get_or_create(
-            every=check_interval,
-            period=IntervalSchedule.MINUTES,
+        schedule, created = (
+            IntervalSchedule.objects.get_or_create(
+                every=check_interval,
+                period=IntervalSchedule.MINUTES,
+            )
         )
 
         PeriodicTask.objects.create(
-        interval=schedule,
-        name=f"monitor-{monitor.id}",
-        task="monitor.tasks.check_monitor_task",
-        args=json.dumps([monitor.id]),
-    )
+            interval=schedule,
+            name=f"monitor-{monitor.id}",
+            task="monitor.tasks.check_monitor_task",
+            args=json.dumps([monitor.id]),
+        )
 
         return redirect("monitor_list")
 
@@ -226,14 +251,17 @@ def add_monitor(request):
 @login_required
 def monitor_list(request):
 
-    monitors = Monitor.objects.all()
+    monitors = Monitor.objects.filter(
+        user=request.user
+    )
 
-   
     for monitor in monitors:
 
-        monitor.latest_check = monitor.health_checks.order_by(
-            "-checked_at"
-        ).first()
+        monitor.latest_check = (
+            monitor.health_checks
+            .order_by("-checked_at")
+            .first()
+        )
 
         monitor.uptime_24h = calculate_uptime(
             monitor,
@@ -248,8 +276,7 @@ def monitor_list(request):
         monitor.uptime_30d = calculate_uptime(
             monitor,
             hours=24 * 30
-        )        
-        
+        )
 
     total_monitors = monitors.count()
 
@@ -280,20 +307,28 @@ def monitor_list(request):
         "monitor_list.html",
         {
             "monitors": monitors,
+
             "total_monitors": total_monitors,
+
             "active_monitors": active_monitors,
+
             "paused_monitors": paused_monitors,
+
             "up_monitors": up_monitors,
+
             "down_monitors": down_monitors,
         }
     )
 
 
-
 @login_required
 def monitor_details(request, id):
 
-    monitor = Monitor.objects.get(id=id)
+    monitor = get_object_or_404(
+        Monitor,
+        id=id,
+        user=request.user
+    )
 
     health_checks = monitor.health_checks.order_by(
         "-checked_at"
@@ -306,7 +341,9 @@ def monitor_details(request, id):
         "monitor_details.html",
         {
             "monitor": monitor,
+
             "health_checks": health_checks,
+
             "latest_check": latest_check,
         }
     )
@@ -317,7 +354,8 @@ def monitor_graph_api(request, id):
 
     monitor = get_object_or_404(
         Monitor,
-        id=id
+        id=id,
+        user=request.user
     )
 
     health_checks = monitor.health_checks.order_by(
@@ -332,7 +370,9 @@ def monitor_graph_api(request, id):
             "time": timezone.localtime(
                 check.checked_at
             ).strftime("%H:%M"),
+
             "response_time": check.response_time,
+
             "success": check.success,
         })
 
