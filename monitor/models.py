@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Monitor(models.Model):
@@ -12,6 +13,15 @@ class Monitor(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     check_interval = models.PositiveIntegerField(default=5)
+    
+    user = models.ForeignKey(
+    User,
+    on_delete=models.CASCADE,
+    related_name="monitors",
+    null=True,
+    blank=True,
+)
+    
 
     def __str__(self):
         return self.name
