@@ -12,403 +12,685 @@
         {% block title %}Pingger{% endblock %}
     </title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
 
-        * {
-            box-sizing: border-box;
+        /* =============================================
+           CSS VARIABLES — DESIGN TOKENS
+        ============================================= */
+
+        :root {
+            --bg:           #0a0b0f;
+            --surface:      #111318;
+            --card:         #16191f;
+            --card-hover:   #1c2029;
+            --border:       #1e2330;
+            --border-light: #252c3a;
+            --accent:       #6366f1;
+            --accent-hover: #4f46e5;
+            --accent-glow:  rgba(99, 102, 241, 0.25);
+            --green:        #22c55e;
+            --green-bg:     rgba(34, 197, 94, 0.1);
+            --green-glow:   rgba(34, 197, 94, 0.2);
+            --red:          #ef4444;
+            --red-bg:       rgba(239, 68, 68, 0.1);
+            --red-glow:     rgba(239, 68, 68, 0.2);
+            --yellow:       #f59e0b;
+            --gray:         #94a3b8;
+            --gray-bg:      rgba(148, 163, 184, 0.1);
+            --text:         #f1f5f9;
+            --text-muted:   #94a3b8;
+            --text-dim:     #64748b;
+            --shadow-sm:    0 1px 3px rgba(0,0,0,0.4);
+            --shadow-md:    0 4px 16px rgba(0,0,0,0.5);
+            --shadow-lg:    0 8px 32px rgba(0,0,0,0.6);
+            --radius-sm:    6px;
+            --radius-md:    10px;
+            --radius-lg:    16px;
+            --radius-xl:    20px;
+            --transition:   all 0.2s cubic-bezier(0.4,0,0.2,1);
         }
 
+
+        /* =============================================
+           RESET & BASE
+        ============================================= */
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
-
-            margin: 0;
-
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-
-            background: #f5f7fb;
-
-            color: #222;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
 
+        a { color: inherit; text-decoration: none; }
 
-        /* =========================
+        button { font-family: inherit; }
+
+
+        /* =============================================
            NAVBAR
-        ========================= */
+        ============================================= */
 
         .navbar {
-
             height: 64px;
-
-            background: #ffffff;
-
-            border-bottom:
-                1px solid #e5e7eb;
-
+            background: rgba(17, 19, 24, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
             display: flex;
-
             align-items: center;
-
             justify-content: space-between;
-
-            padding: 0 30px;
-
+            padding: 0 28px;
             position: sticky;
-
             top: 0;
-
             z-index: 1000;
         }
 
 
+        /* Brand */
+
         .brand {
-
+            display: flex;
+            align-items: center;
+            gap: 10px;
             text-decoration: none;
-
-            color: #111;
-
-            font-size: 21px;
-
-            font-weight: bold;
+            color: var(--text);
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            transition: var(--transition);
         }
 
+        .brand:hover {
+            opacity: 0.85;
+        }
+
+        .brand-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+            flex-shrink: 0;
+        }
+
+        .brand-name {
+            background: linear-gradient(135deg, #e2e8f0, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+
+        /* Nav right */
 
         .nav-right {
-
             display: flex;
-
             align-items: center;
-
-            gap: 18px;
+            gap: 6px;
         }
 
+
+        /* Nav link */
 
         .nav-link {
-
+            display: flex;
+            align-items: center;
+            gap: 6px;
             text-decoration: none;
-
-            color: #444;
-
-            font-size: 14px;
+            color: var(--text-muted);
+            font-size: 13.5px;
+            font-weight: 500;
+            padding: 7px 12px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
         }
-
 
         .nav-link:hover {
+            color: var(--text);
+            background: var(--card);
+        }
 
-            color: #000;
+        .nav-link svg {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
         }
 
 
-        /* =========================
-           USER
-        ========================= */
+        /* Nav divider */
+
+        .nav-divider {
+            width: 1px;
+            height: 22px;
+            background: var(--border);
+            margin: 0 6px;
+        }
+
+
+        /* =============================================
+           USER INFO
+        ============================================= */
 
         .user-info {
-
             display: flex;
-
             align-items: center;
-
             gap: 8px;
-
-            font-size: 14px;
+            font-size: 13.5px;
+            font-weight: 500;
+            color: var(--text-muted);
+            padding: 5px 10px;
+            border-radius: var(--radius-sm);
         }
-
 
         .user-avatar {
-
-            width: 32px;
-
-            height: 32px;
-
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
-
-            background: #e9eef6;
-
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
             display: flex;
-
             align-items: center;
-
             justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
+        }
 
-            font-size: 16px;
+        .user-email {
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
 
-        /* =========================
-           LOGOUT
-        ========================= */
+        /* =============================================
+           LOGOUT BUTTON
+        ============================================= */
 
         .logout-button {
-
-            border:
-                1px solid #ddd;
-
-            background: white;
-
-            padding: 7px 12px;
-
-            border-radius: 6px;
-
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid var(--border);
+            background: transparent;
+            padding: 7px 13px;
+            border-radius: var(--radius-sm);
             cursor: pointer;
-
             font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: var(--transition);
         }
-
 
         .logout-button:hover {
+            background: var(--card);
+            border-color: var(--border-light);
+            color: var(--text);
+        }
 
-            background: #f3f3f3;
+        .logout-button svg {
+            width: 14px;
+            height: 14px;
         }
 
 
-        /* =========================
-           ALERTS
-        ========================= */
+        /* =============================================
+           ALERT BUTTON & DROPDOWN
+        ============================================= */
 
         .alert-wrapper {
-
             position: relative;
         }
-
 
         .alert-button {
-
             position: relative;
-
-            border: none;
-
+            border: 1px solid var(--border);
             background: transparent;
-
             cursor: pointer;
-
-            font-size: 20px;
-
             width: 36px;
-
             height: 36px;
-
-            border-radius: 50%;
-
+            border-radius: var(--radius-sm);
             display: flex;
-
             align-items: center;
-
             justify-content: center;
+            color: var(--text-muted);
+            transition: var(--transition);
         }
-
 
         .alert-button:hover {
-
-            background: #f3f4f6;
+            background: var(--card);
+            border-color: var(--border-light);
+            color: var(--text);
         }
 
+        .alert-button svg {
+            width: 17px;
+            height: 17px;
+        }
 
         .alert-badge {
-
             position: absolute;
-
-            top: -2px;
-
-            right: -2px;
-
-            min-width: 17px;
-
-            height: 17px;
-
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
             padding: 0 4px;
-
-            background: #ef4444;
-
+            background: var(--red);
             color: white;
-
             border-radius: 20px;
-
             font-size: 10px;
-
-            font-weight: bold;
-
+            font-weight: 700;
             display: flex;
-
             align-items: center;
-
             justify-content: center;
+            border: 2px solid var(--bg);
+            box-shadow: 0 0 8px var(--red-glow);
+            font-family: inherit;
         }
-
 
         .alert-dropdown {
-
             position: absolute;
-
-            top: 45px;
-
+            top: 46px;
             right: 0;
-
-            width: 360px;
-
-            background: white;
-
-            border:
-                1px solid #e5e7eb;
-
-            border-radius: 10px;
-
-            box-shadow:
-                0 10px 30px
-                rgba(0, 0, 0, 0.12);
-
+            width: 380px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.03);
             display: none;
-
             overflow: hidden;
+            animation: dropdownSlide 0.18s ease-out;
         }
 
+        @keyframes dropdownSlide {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
 
         .alert-dropdown.show {
-
             display: block;
         }
 
-
         .alert-header {
-
-            padding: 15px;
-
-            font-size: 15px;
-
-            font-weight: bold;
-
-            border-bottom:
-                1px solid #eee;
+            padding: 14px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            font-size: 11px;
+            color: var(--text-dim);
         }
 
-
         .alert-list {
-
             max-height: 400px;
-
             overflow-y: auto;
         }
 
+        .alert-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .alert-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .alert-list::-webkit-scrollbar-thumb {
+            background: var(--border-light);
+            border-radius: 4px;
+        }
 
         .alert-item {
-
-            padding: 13px 15px;
-
-            border-bottom:
-                1px solid #f0f0f0;
-
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
             cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
         }
 
+        .alert-item:last-child {
+            border-bottom: none;
+        }
 
         .alert-item:hover {
-
-            background: #f8fafc;
+            background: var(--card-hover);
         }
-
 
         .alert-item.unread {
-
-            background: #f5f9ff;
+            background: rgba(99, 102, 241, 0.05);
         }
 
+        .alert-item.unread::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--accent);
+        }
+
+        .alert-item {
+            position: relative;
+        }
+
+        .alert-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+
+        .alert-dot.down { background: var(--red); box-shadow: 0 0 6px var(--red-glow); }
+        .alert-dot.up   { background: var(--green); box-shadow: 0 0 6px var(--green-glow); }
+
+        .alert-body {
+            flex: 1;
+            min-width: 0;
+        }
 
         .alert-title {
-
             font-size: 13px;
-
-            font-weight: bold;
-
-            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 3px;
         }
-
 
         .alert-message {
-
             font-size: 12px;
-
-            color: #666;
-
+            color: var(--text-muted);
             line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-
 
         .alert-time {
-
-            margin-top: 6px;
-
+            margin-top: 5px;
             font-size: 11px;
-
-            color: #999;
+            color: var(--text-dim);
         }
 
-
         .no-alerts {
-
-            padding: 25px;
-
+            padding: 32px 16px;
             text-align: center;
-
-            color: #999;
-
+            color: var(--text-dim);
             font-size: 13px;
         }
 
-
-        /* =========================
-           PAGE
-        ========================= */
-
-        .page-container {
-
-            max-width: 1200px;
-
-            margin: 0 auto;
-
-            padding: 30px;
+        .no-alerts-icon {
+            font-size: 28px;
+            display: block;
+            margin-bottom: 10px;
+            opacity: 0.5;
         }
 
 
-        /* =========================
+        /* =============================================
+           PAGE CONTAINER
+        ============================================= */
+
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 28px;
+        }
+
+
+        /* =============================================
+           SHARED COMPONENT STYLES
+        ============================================= */
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 9px;
+            border-radius: 100px;
+            font-size: 11.5px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        .badge-green {
+            background: var(--green-bg);
+            color: var(--green);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .badge-red {
+            background: var(--red-bg);
+            color: var(--red);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .badge-gray {
+            background: var(--gray-bg);
+            color: var(--gray);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .badge-accent {
+            background: var(--accent-glow);
+            color: var(--accent);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+        }
+
+        /* Status dot */
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .status-dot.up    { background: var(--green); box-shadow: 0 0 6px var(--green); }
+        .status-dot.down  { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+        .status-dot.pause { background: var(--gray); }
+
+        /* Primary button */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: var(--transition);
+            box-shadow: 0 0 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 0 22px rgba(99, 102, 241, 0.45);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Secondary button */
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 15px;
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .btn-secondary:hover {
+            background: var(--card);
+            border-color: var(--border-light);
+            color: var(--text);
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.45;
+            cursor: wait;
+        }
+
+        .btn-secondary svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Section heading */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 12px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.2px;
+        }
+
+        /* Card */
+        .pg-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+        }
+
+        /* Form styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 7px;
+            letter-spacing: 0.2px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-dim);
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        input[type=number].form-input {
+            -moz-appearance: textfield;
+        }
+
+        input[type=number].form-input::-webkit-outer-spin-button,
+        input[type=number].form-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+
+        /* Divider */
+        .pg-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 0;
+        }
+
+
+        /* =============================================
            MOBILE
-        ========================= */
+        ============================================= */
 
-        @media (max-width: 600px) {
-
+        @media (max-width: 768px) {
             .navbar {
-
-                padding: 0 15px;
+                padding: 0 16px;
             }
-
 
             .nav-right {
-
-                gap: 10px;
+                gap: 4px;
             }
 
-
-            .user-info span {
-
+            .user-email {
                 display: none;
             }
 
-
             .alert-dropdown {
-
-                width: 300px;
-
-                right: -80px;
+                width: 320px;
+                right: -60px;
             }
-
 
             .page-container {
+                padding: 20px 16px;
+            }
+        }
 
-                padding: 20px;
+        @media (max-width: 480px) {
+            .brand-name {
+                display: none;
             }
 
+            .alert-dropdown {
+                width: 290px;
+                right: -90px;
+            }
         }
 
     </style>
@@ -417,27 +699,27 @@
     {% block extra_css %}
     {% endblock %}
 
+
 </head>
 
 
 <body>
 
 
-    <!-- =========================
+    <!-- =============================================
          NAVBAR
-    ========================= -->
+    ============================================= -->
 
     <nav class="navbar">
 
 
         <!-- BRAND -->
 
-        <a
-            href="{% url 'monitor_list' %}"
-            class="brand"
-        >
+        <a href="{% url 'monitor_list' %}" class="brand">
 
-            🔔 Pingger
+            <div class="brand-icon">🔔</div>
+
+            <span class="brand-name">Pingger</span>
 
         </a>
 
@@ -448,24 +730,23 @@
             <div class="nav-right">
 
 
-                <!-- MONITORS -->
+                <!-- MONITORS LINK -->
 
-                <a
-                    href="{% url 'monitor_list' %}"
-                    class="nav-link"
-                >
-
+                <a href="{% url 'monitor_list' %}" class="nav-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2"/>
+                        <path d="M8 21h8M12 17v4"/>
+                    </svg>
                     Monitors
-
                 </a>
 
 
-                <!-- =========================
-                     ALERT BUTTON
-                ========================= -->
+                <div class="nav-divider"></div>
+
+
+                <!-- ALERT BUTTON -->
 
                 <div class="alert-wrapper">
-
 
                     <button
                         type="button"
@@ -474,17 +755,17 @@
                         aria-label="Notifications"
                     >
 
-                        🔔
-
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
 
                         <span
                             class="alert-badge"
                             id="alertBadge"
                             style="display: none;"
                         >
-
                             0
-
                         </span>
 
                     </button>
@@ -492,82 +773,54 @@
 
                     <!-- ALERT DROPDOWN -->
 
-                    <div
-                        class="alert-dropdown"
-                        id="alertDropdown"
-                    >
-
+                    <div class="alert-dropdown" id="alertDropdown">
 
                         <div class="alert-header">
-
-                            Alerts
-
+                            <span>Notifications</span>
                         </div>
 
-
-                        <div
-                            id="alertList"
-                            class="alert-list"
-                        >
+                        <div id="alertList" class="alert-list">
 
                             <div class="no-alerts">
-
-                                No alerts
-
+                                <span class="no-alerts-icon">🔕</span>
+                                No alerts yet
                             </div>
 
                         </div>
 
-
                     </div>
 
                 </div>
 
 
-                <!-- =========================
-                     USER
-                ========================= -->
+                <!-- USER INFO -->
 
                 <div class="user-info">
 
-
                     <div class="user-avatar">
-
-                        👤
-
+                        {{ user.email|default:user.username|slice:":1"|upper }}
                     </div>
 
-
-                    <span>
-
+                    <span class="user-email">
                         {{ user.email|default:user.username }}
-
                     </span>
-
 
                 </div>
 
 
-                <!-- =========================
-                     LOGOUT
-                ========================= -->
+                <!-- LOGOUT -->
 
-                <form
-                    method="post"
-                    action="{% url 'account_logout' %}"
-                    style="margin: 0;"
-                >
+                <form method="post" action="{% url 'account_logout' %}" style="margin: 0;">
 
                     {% csrf_token %}
 
-
-                    <button
-                        type="submit"
-                        class="logout-button"
-                    >
-
+                    <button type="submit" class="logout-button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
                         Logout
-
                     </button>
 
                 </form>
@@ -582,9 +835,9 @@
     </nav>
 
 
-    <!-- =========================
+    <!-- =============================================
          PAGE CONTENT
-    ========================= -->
+    ============================================= -->
 
     <main class="page-container">
 
@@ -596,17 +849,17 @@
     </main>
 
 
-    <!-- =========================
+    <!-- =============================================
          EXTRA JAVASCRIPT
-    ========================= -->
+    ============================================= -->
 
     {% block extra_js %}
     {% endblock %}
 
 
-    <!-- =========================
+    <!-- =============================================
          ALERT JAVASCRIPT
-    ========================= -->
+    ============================================= -->
 
     {% if user.is_authenticated %}
 
@@ -772,13 +1025,10 @@
 
 
                             alertList.innerHTML = `
-
                                 <div class="no-alerts">
-
-                                    No alerts
-
+                                    <span class="no-alerts-icon">🔕</span>
+                                    No alerts yet
                                 </div>
-
                             `;
 
 
@@ -802,16 +1052,14 @@
                                             "down";
 
 
-                                        const icon =
-                                            isDown
-                                                ? "🔴"
-                                                : "🟢";
-
-
                                         const title =
                                             isDown
                                                 ? "Website Down"
                                                 : "Website Back Online";
+
+
+                                        const dotClass =
+                                            isDown ? "down" : "up";
 
 
                                         return `
@@ -826,36 +1074,13 @@
                                                     alert.id
                                                 }"
                                             >
+                                                <span class="alert-dot ${dotClass}"></span>
 
-
-                                                <div
-                                                    class="alert-title"
-                                                >
-
-                                                    ${icon}
-
-                                                    ${title}
-
+                                                <div class="alert-body">
+                                                    <div class="alert-title">${title}</div>
+                                                    <div class="alert-message">${alert.monitor}</div>
+                                                    <div class="alert-time">${alert.created_at}</div>
                                                 </div>
-
-
-                                                <div
-                                                    class="alert-message"
-                                                >
-
-                                                    ${alert.monitor}
-
-                                                </div>
-
-
-                                                <div
-                                                    class="alert-time"
-                                                >
-
-                                                    ${alert.created_at}
-
-                                                </div>
-
 
                                             </div>
 
