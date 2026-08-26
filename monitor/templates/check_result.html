@@ -1,83 +1,372 @@
 {% extends "base.html" %}
 
-{% block title %}
-Monitors - Pingger
+{% block title %}Check Result — {{ monitor.name }} — Pingger{% endblock %}
+
+{% block extra_css %}
+<style>
+
+    .result-page {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .result-header {
+        margin-bottom: 24px;
+    }
+
+    .result-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--text-dim);
+        margin-bottom: 12px;
+    }
+
+    .result-breadcrumb a {
+        color: var(--text-dim);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .result-breadcrumb a:hover {
+        color: var(--accent);
+    }
+
+    .result-breadcrumb svg {
+        width: 12px;
+        height: 12px;
+        opacity: 0.5;
+    }
+
+    .result-title {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.4px;
+        color: var(--text);
+        margin-bottom: 4px;
+    }
+
+    .result-url {
+        font-size: 13px;
+        color: var(--text-dim);
+    }
+
+    .result-url a {
+        color: var(--accent);
+        text-decoration: none;
+    }
+
+    .result-url a:hover {
+        text-decoration: underline;
+    }
+
+    /* Result Panel */
+
+    .result-panel {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        margin-bottom: 16px;
+    }
+
+    .result-status-bar {
+        padding: 28px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .result-status-bar.up {
+        background: linear-gradient(135deg, rgba(34,197,94,0.08), transparent);
+    }
+
+    .result-status-bar.down {
+        background: linear-gradient(135deg, rgba(239,68,68,0.08), transparent);
+    }
+
+    .result-big-icon {
+        font-size: 40px;
+        line-height: 1;
+    }
+
+    .result-status-text {
+        flex: 1;
+    }
+
+    .result-status-title {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.3px;
+        margin-bottom: 4px;
+    }
+
+    .result-status-title.up   { color: var(--green); }
+    .result-status-title.down { color: var(--red); }
+
+    .result-status-subtitle {
+        font-size: 13.5px;
+        color: var(--text-dim);
+    }
+
+    /* Metrics Grid */
+
+    .result-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+    }
+
+    .result-metric {
+        padding: 18px 20px;
+        border-right: 1px solid var(--border);
+    }
+
+    .result-metric:last-child {
+        border-right: none;
+    }
+
+    .result-metric-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-dim);
+        margin-bottom: 6px;
+    }
+
+    .result-metric-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    /* Error Block */
+
+    .result-error {
+        margin: 0 20px 20px;
+        padding: 12px 14px;
+        background: var(--red-bg);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        color: var(--red);
+    }
+
+    .result-error strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Settings card */
+
+    .settings-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 18px 20px;
+        margin-bottom: 20px;
+    }
+
+    .settings-card-title {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--text-dim);
+        margin-bottom: 12px;
+    }
+
+    .settings-items {
+        display: flex;
+        gap: 28px;
+        flex-wrap: wrap;
+    }
+
+    .settings-item {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .settings-item-label {
+        font-size: 11px;
+        color: var(--text-dim);
+    }
+
+    .settings-item-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    /* Action Links */
+
+    .result-nav {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 480px) {
+        .result-metrics {
+            grid-template-columns: 1fr;
+        }
+
+        .result-metric {
+            border-right: none;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-metric:last-child {
+            border-bottom: none;
+        }
+    }
+
+</style>
 {% endblock %}
 
 {% block content %}
 
-    <h1>🔔 Pingger</h1>
+    <div class="result-page">
 
-    <h2>{{ monitor.name }}</h2>
+        <!-- Breadcrumb & Header -->
 
-    <p>
-        URL:
-        <a href="{{ monitor.url }}" target="_blank">
-            {{ monitor.url }}
-        </a>
-    </p>
+        <div class="result-header">
 
-    <hr>
+            <div class="result-breadcrumb">
+                <a href="{% url 'monitor_list' %}">Monitors</a>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+                <span>Check Result</span>
+            </div>
 
-    {% if health_check.success %}
+            <div class="result-title">{{ monitor.name }}</div>
 
-        <h2>🟢 Website is UP</h2>
+            <div class="result-url">
+                <a href="{{ monitor.url }}" target="_blank">{{ monitor.url }}</a>
+            </div>
 
-        <p>
-            Status Code:
-            <strong>{{ health_check.status_code }}</strong>
-        </p>
+        </div>
 
-        <p>
-            Response Time:
-            <strong>{{ health_check.response_time }} ms</strong>
-        </p>
 
-    {% else %}
+        <!-- Result Panel -->
 
-        <h2>🔴 Website is DOWN</h2>
+        <div class="result-panel">
 
-        {% if health_check.status_code %}
-            <p>
-                Status Code:
-                <strong>{{ health_check.status_code }}</strong>
-            </p>
-        {% endif %}
+            <!-- Status Bar -->
 
-        {% if health_check.error %}
-            <p>
-                Error:
-                <strong>{{ health_check.error }}</strong>
-            </p>
-        {% endif %}
+            {% if health_check.success %}
 
-    {% endif %}
+                <div class="result-status-bar up">
+                    <div class="result-big-icon">🟢</div>
+                    <div class="result-status-text">
+                        <div class="result-status-title up">Website is UP</div>
+                        <div class="result-status-subtitle">The website responded successfully.</div>
+                    </div>
+                    <span class="badge badge-green">
+                        <span class="status-dot up"></span>
+                        Online
+                    </span>
+                </div>
 
-    <hr>
+            {% else %}
 
-    <h3>Monitor Settings</h3>
+                <div class="result-status-bar down">
+                    <div class="result-big-icon">🔴</div>
+                    <div class="result-status-text">
+                        <div class="result-status-title down">Website is DOWN</div>
+                        <div class="result-status-subtitle">The website failed to respond.</div>
+                    </div>
+                    <span class="badge badge-red">
+                        <span class="status-dot down"></span>
+                        Offline
+                    </span>
+                </div>
 
-    <p>
-        Check every:
-        <strong>{{ monitor.check_interval }} minutes</strong>
-    </p>
+            {% endif %}
 
-    <p>
-        Last checked:
-        <strong>{{ health_check.checked_at }}</strong>
-    </p>
 
-    <br>
+            <!-- Metrics -->
 
-    <a href="{% url 'monitor_details' monitor.id %}">
-        View Monitoring History
-    </a>
+            <div class="result-metrics">
 
-    <br><br>
+                <div class="result-metric">
+                    <div class="result-metric-label">Status Code</div>
+                    <div class="result-metric-value">{{ health_check.status_code|default:"—" }}</div>
+                </div>
 
-    <a href="{% url 'monitor_list' %}">
-        ← Back to Monitors
-    </a>
+                <div class="result-metric">
+                    <div class="result-metric-label">Response Time</div>
+                    <div class="result-metric-value">
+                        {% if health_check.response_time %}{{ health_check.response_time }} ms{% else %}—{% endif %}
+                    </div>
+                </div>
 
-</body>
+                <div class="result-metric">
+                    <div class="result-metric-label">Checked At</div>
+                    <div class="result-metric-value" style="font-size:13px;">{{ health_check.checked_at }}</div>
+                </div>
+
+            </div>
+
+
+            <!-- Error (if any) -->
+
+            {% if health_check.error %}
+                <div class="result-error">
+                    <strong>Error Detail</strong>
+                    {{ health_check.error }}
+                </div>
+            {% endif %}
+
+        </div>
+
+
+        <!-- Settings Card -->
+
+        <div class="settings-card">
+            <div class="settings-card-title">Monitor Settings</div>
+            <div class="settings-items">
+                <div class="settings-item">
+                    <span class="settings-item-label">Check Interval</span>
+                    <span class="settings-item-value">Every {{ monitor.check_interval }} minutes</span>
+                </div>
+                <div class="settings-item">
+                    <span class="settings-item-label">Last Checked</span>
+                    <span class="settings-item-value">{{ health_check.checked_at }}</span>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Navigation -->
+
+        <div class="result-nav">
+
+            <a href="{% url 'monitor_details' monitor.id %}" class="btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                View History
+            </a>
+
+            <a href="{% url 'monitor_list' %}" class="btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+                Back to Monitors
+            </a>
+
+        </div>
+
+    </div>
+
 {% endblock %}

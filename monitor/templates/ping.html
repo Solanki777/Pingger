@@ -1,61 +1,267 @@
 {% extends "base.html" %}
 
-{% block title %}
-Monitors - Pingger
+{% block title %}Ping Tool — Pingger{% endblock %}
+
+{% block extra_css %}
+<style>
+
+    .ping-page {
+        max-width: 580px;
+        margin: 0 auto;
+    }
+
+    .ping-header {
+        margin-bottom: 28px;
+        text-align: center;
+    }
+
+    .ping-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: var(--radius-md);
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        margin: 0 auto 16px;
+        box-shadow: 0 0 24px rgba(34, 197, 94, 0.3);
+    }
+
+    .ping-title {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.4px;
+        color: var(--text);
+        margin-bottom: 8px;
+    }
+
+    .ping-subtitle {
+        font-size: 14px;
+        color: var(--text-dim);
+        line-height: 1.6;
+    }
+
+    /* Form Card */
+
+    .ping-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 28px;
+        margin-bottom: 20px;
+    }
+
+    .ping-form-row {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+    }
+
+    .ping-form-row .form-group {
+        flex: 1;
+        margin-bottom: 0;
+    }
+
+    .btn-ping {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 22px;
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: var(--transition);
+        box-shadow: 0 0 16px rgba(34, 197, 94, 0.25);
+        white-space: nowrap;
+        flex-shrink: 0;
+        height: 42px;
+    }
+
+    .btn-ping:hover {
+        box-shadow: 0 0 24px rgba(34, 197, 94, 0.4);
+        transform: translateY(-1px);
+        filter: brightness(1.05);
+    }
+
+    .btn-ping:active {
+        transform: translateY(0);
+    }
+
+    .btn-ping svg {
+        width: 15px;
+        height: 15px;
+    }
+
+    /* Result Card */
+
+    .ping-result {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .ping-result-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .ping-result-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .ping-result-body {
+        padding: 20px 24px;
+    }
+
+    .ping-result-message {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 16px;
+    }
+
+    .ping-metrics {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .ping-metric {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .ping-metric-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-dim);
+    }
+
+    .ping-metric-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    @media (max-width: 480px) {
+        .ping-form-row {
+            flex-direction: column;
+        }
+
+        .btn-ping {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+</style>
 {% endblock %}
 
 {% block content %}
 
-    <h1>🔔 Pingger</h1>
+    <div class="ping-page">
 
-    <p>Check whether your website is alive.</p>
+        <!-- Header -->
 
-    <form method="POST">
+        <div class="ping-header">
+            <div class="ping-icon">📡</div>
+            <div class="ping-title">Quick Ping</div>
+            <div class="ping-subtitle">Check whether any website or API endpoint is alive right now.</div>
+        </div>
 
-        {% csrf_token %}
 
-        <label for="url">
-            Website URL:
-        </label>
+        <!-- Form -->
 
-        <input
-            type="url"
-            name="url"
-            id="url"
-            placeholder="https://example.com"
-            required
-        >
+        <div class="ping-card">
 
-        <button type="submit">
-            Check Website
-        </button>
+            <form method="POST">
+                {% csrf_token %}
 
-    </form>
+                <div class="ping-form-row">
 
-{% if result %}
+                    <div class="form-group">
+                        <label for="url" class="form-label">Website URL</label>
+                        <input
+                            type="url"
+                            name="url"
+                            id="url"
+                            class="form-input"
+                            placeholder="https://example.com"
+                            required
+                        />
+                    </div>
 
-    <hr>
+                    <button type="submit" class="btn-ping">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                        Check
+                    </button>
 
-    <h2>Result</h2>
+                </div>
 
-    <p>
-        {{ result }}
-    </p>
+            </form>
 
-    {% if status_code %}
-        <p>
-            Status Code:
-            <strong>{{ status_code }}</strong>
-        </p>
-    {% endif %}
+        </div>
 
-    {% if response_time %}
-        <p>
-            Response Time:
-            <strong>{{ response_time }} ms</strong>
-        </p>
-    {% endif %}
 
-{% endif %}
+        <!-- Result (if any) -->
+
+        {% if result %}
+
+            <div class="ping-result">
+
+                <div class="ping-result-header">
+                    <span class="ping-result-title">Result</span>
+                </div>
+
+                <div class="ping-result-body">
+
+                    <div class="ping-result-message">
+                        {{ result }}
+                    </div>
+
+                    <div class="ping-metrics">
+
+                        {% if status_code %}
+                            <div class="ping-metric">
+                                <span class="ping-metric-label">Status Code</span>
+                                <span class="ping-metric-value">{{ status_code }}</span>
+                            </div>
+                        {% endif %}
+
+                        {% if response_time %}
+                            <div class="ping-metric">
+                                <span class="ping-metric-label">Response Time</span>
+                                <span class="ping-metric-value">{{ response_time }} ms</span>
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    </div>
 
 {% endblock %}

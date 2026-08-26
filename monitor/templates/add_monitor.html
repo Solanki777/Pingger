@@ -1,61 +1,209 @@
 {% extends "base.html" %}
 
-{% block title %}
-Monitors - Pingger
+{% block title %}Add Monitor — Pingger{% endblock %}
+
+{% block extra_css %}
+<style>
+
+    .form-page {
+        max-width: 520px;
+        margin: 0 auto;
+    }
+
+    .form-page-header {
+        margin-bottom: 28px;
+    }
+
+    .form-page-title {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.4px;
+        color: var(--text);
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-page-title-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+    }
+
+    .form-page-subtitle {
+        font-size: 13.5px;
+        color: var(--text-dim);
+    }
+
+    .form-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 28px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 180px;
+        gap: 14px;
+    }
+
+    .form-hint {
+        font-size: 12px;
+        color: var(--text-dim);
+        margin-top: 5px;
+    }
+
+    .form-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .btn-submit {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 24px;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: var(--transition);
+        box-shadow: 0 0 16px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-submit:hover {
+        background: var(--accent-hover);
+        box-shadow: 0 0 24px rgba(99, 102, 241, 0.45);
+        transform: translateY(-1px);
+    }
+
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+
+    .btn-submit svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    @media (max-width: 480px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+</style>
 {% endblock %}
 
 {% block content %}
 
-    <h1>🔔 Pingger</h1>
+    <div class="form-page">
 
-    <h2>Add Website Monitor</h2>
+        <!-- Header -->
 
-    <form method="POST">
-      {% csrf_token %}
+        <div class="form-page-header">
+            <div class="form-page-title">
+                <div class="form-page-title-icon">📡</div>
+                Add Website Monitor
+            </div>
+            <div class="form-page-subtitle">Start tracking uptime for a new website or API endpoint.</div>
+        </div>
 
-      <div>
-        <label for="name"> Website Name </label>
 
-        <input
-          type="text"
-          name="name"
-          id="name"
-          placeholder="My Portfolio"
-          required
-        />
-      </div>
+        <!-- Form Card -->
 
-      <br />
+        <div class="form-card">
 
-      <div>
-        <label for="url"> Website URL </label>
+            <form method="POST">
+                {% csrf_token %}
 
-        <input
-          type="url"
-          name="url"
-          id="url"
-          placeholder="https://example.com"
-          required
-        />
-        <label for="check_interval"> Check every: </label>
+                <div class="form-group">
+                    <label for="name" class="form-label">Website Name</label>
+                    <input
+                        type="text"
+                        name="name"
+                        id="name"
+                        class="form-input"
+                        placeholder="My Portfolio"
+                        required
+                    />
+                    <div class="form-hint">A friendly name to identify this monitor.</div>
+                </div>
 
-        <input
-          type="number"
-          name="check_interval"
-          id="check_interval"
-          min="1"
-          value="5"
-          required
-        />
-      </div>
+                <div class="form-row">
 
-      <br />
+                    <div class="form-group">
+                        <label for="url" class="form-label">Website URL</label>
+                        <input
+                            type="url"
+                            name="url"
+                            id="url"
+                            class="form-input"
+                            placeholder="https://example.com"
+                            required
+                        />
+                        <div class="form-hint">Full URL including https://</div>
+                    </div>
 
-      <button type="submit">Add Monitor</button>
-    </form>
+                    <div class="form-group">
+                        <label for="check_interval" class="form-label">Check Every</label>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <input
+                                type="number"
+                                name="check_interval"
+                                id="check_interval"
+                                class="form-input"
+                                min="1"
+                                value="5"
+                                required
+                                style="flex:1;"
+                            />
+                            <span style="color:var(--text-dim); font-size:13px; white-space:nowrap;">min</span>
+                        </div>
+                    </div>
 
-    <br />
+                </div>
 
-    <a href="{% url 'monitor_list' %}"> View My Monitors </a>
-  </body>
+                <div class="form-footer">
+
+                    <a href="{% url 'monitor_list' %}" class="btn-secondary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"/>
+                        </svg>
+                        Cancel
+                    </a>
+
+                    <button type="submit" class="btn-submit">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Add Monitor
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
 {% endblock %}

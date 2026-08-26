@@ -1,254 +1,687 @@
 {% extends "base.html" %}
 
-{% block title %}
-Monitors - Pingger
-{% endblock %}
+{% block title %}{{ monitor.name }} — Pingger{% endblock %}
 
-{% block content %}
+{% block extra_css %}
+<style>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        
+    /* ── Page Header ── */
+
+    .detail-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+    }
+
+    .detail-title-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 6px;
+    }
+
+    .detail-title {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.4px;
+        color: var(--text);
+    }
+
+    .detail-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+    }
+
+    .meta-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12.5px;
+        color: var(--text-dim);
+    }
+
+    .meta-chip svg {
+        width: 13px;
+        height: 13px;
+        opacity: 0.6;
+    }
+
+    .meta-chip a {
+        color: var(--accent);
+        text-decoration: none;
+    }
+
+    .meta-chip a:hover {
+        text-decoration: underline;
+    }
+
+    .detail-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+
+    /* ── Latest Status Panel ── */
+
+    #latest-status-section {
+        margin-bottom: 24px;
+    }
+
+    .status-panel {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 24px;
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .status-indicator {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        min-width: 90px;
+        padding: 16px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        background: var(--surface);
+    }
+
+    .status-indicator .big-dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .status-indicator .big-dot.up {
+        background: var(--green);
+        box-shadow: 0 0 16px var(--green-glow), 0 0 32px var(--green-glow);
+        animation: pulse-status 2s ease-in-out infinite;
+    }
+
+    .status-indicator .big-dot.down {
+        background: var(--red);
+        box-shadow: 0 0 16px var(--red-glow), 0 0 32px var(--red-glow);
+        animation: pulse-status 2s ease-in-out infinite;
+    }
+
+    .status-indicator .big-dot.unknown {
+        background: var(--gray);
+    }
+
+    @keyframes pulse-status {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50%       { transform: scale(1.15); opacity: 0.8; }
+    }
+
+    .status-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-dim);
+        text-align: center;
+    }
+
+    .status-text {
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .status-text.up   { color: var(--green); }
+    .status-text.down { color: var(--red); }
+
+    .status-metrics {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        flex: 1;
+    }
+
+    .metric-block {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .metric-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-dim);
+    }
+
+    .metric-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .metric-note {
+        font-size: 12px;
+        color: var(--text-dim);
+    }
+
+    .error-block {
+        width: 100%;
+        padding: 12px 14px;
+        background: var(--red-bg);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        color: var(--red);
+        margin-top: 8px;
+    }
+
+    .not-checked {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 32px;
+        text-align: center;
+        flex: 1;
+    }
+
+    .not-checked-icon {
+        font-size: 36px;
+        opacity: 0.4;
+    }
+
+    .not-checked-text {
+        color: var(--text-dim);
+        font-size: 14px;
+    }
+
+
+    /* ── Section Headers ── */
+
+    .section-header-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 28px 0 14px;
+        gap: 12px;
+    }
+
+    .section-title-bar {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .section-title-bar::before {
+        content: '';
+        display: inline-block;
+        width: 3px;
+        height: 14px;
+        background: var(--accent);
+        border-radius: 2px;
+    }
+
+
+    /* ── Log Terminal ── */
+
     .log-terminal {
         background: #0d1117;
-        color: #c9d1d9;
-        border-radius: 8px;
-        border: 1px solid #30363d;
+        border: 1px solid #21262d;
+        border-radius: var(--radius-md);
         overflow: hidden;
-        font-family: Consolas, "Courier New", monospace;
+        font-family: 'JetBrains Mono', 'Fira Code', Consolas, 'Courier New', monospace;
+        box-shadow: var(--shadow-md);
     }
 
     .log-terminal-header {
-        padding: 12px 16px;
+        padding: 11px 16px;
         background: #161b22;
-        border-bottom: 1px solid #30363d;
-        font-family: Arial, sans-serif;
-        font-weight: bold;
+        border-bottom: 1px solid #21262d;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: 'Inter', sans-serif;
     }
 
+    .log-terminal-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: #8b949e;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .log-dots {
+        display: flex;
+        gap: 5px;
+    }
+
+    .log-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .log-dot.red    { background: #ff5f57; }
+    .log-dot.yellow { background: #ffbd2e; }
+    .log-dot.green  { background: #28c840; }
+
     .live {
-        float: right;
+        display: flex;
+        align-items: center;
+        gap: 5px;
         color: #3fb950;
-        font-size: 13px;
+        font-size: 11.5px;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .live-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #3fb950;
+        animation: blink 1.4s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0.2; }
     }
 
     .log-content {
-        padding: 8px 0;
-        max-height: 450px;
+        padding: 6px 0;
+        max-height: 380px;
         overflow-y: auto;
     }
 
+    .log-content::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .log-content::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .log-content::-webkit-scrollbar-thumb {
+        background: #30363d;
+        border-radius: 4px;
+    }
+
     .log-line {
-        padding: 7px 16px;
+        padding: 5px 16px;
+        font-size: 13px;
         white-space: nowrap;
-        font-size: 14px;
+        overflow-x: auto;
+        transition: background 0.1s;
+        display: flex;
+        align-items: center;
+        gap: 0;
     }
 
     .log-line:hover {
         background: #161b22;
     }
 
-    .log-time {
-        color: #8b949e;
+    .log-time     { color: #8b949e; }
+    .log-user     { color: #58a6ff; }
+    .log-celery   { color: #d2a8ff; }
+    .log-success  { color: #3fb950; }
+    .log-failed   { color: #f85149; }
+    .log-response { color: #79c0ff; }
+    .log-error    { color: #f85149; }
+
+
+    /* ── Charts ── */
+
+    .chart-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
     }
 
-    .log-user {
-        color: #58a6ff;
+    .chart-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        overflow: hidden;
     }
 
-    .log-celery {
-        color: #d2a8ff;
+    .chart-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    .log-success {
-        color: #3fb950;
+    .chart-title svg {
+        width: 15px;
+        height: 15px;
+        opacity: 0.6;
     }
 
-    .log-failed {
-        color: #f85149;
+    @media (max-width: 768px) {
+        .chart-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .status-metrics {
+            gap: 14px;
+        }
     }
 
-    .log-response {
-        color: #79c0ff;
+
+    /* ── Back link ── */
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-dim);
+        font-size: 13px;
+        text-decoration: none;
+        transition: var(--transition);
+        margin-top: 16px;
     }
 
-    .log-error {
-        color: #f85149;
+    .back-link:hover {
+        color: var(--text);
     }
+
+    .back-link svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* toggle button on details page */
+    #toggle-monitor-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 15px;
+        background: transparent;
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        transition: var(--transition);
+        font-family: inherit;
+    }
+
+    #toggle-monitor-button:hover {
+        background: var(--card);
+        border-color: var(--border-light);
+        color: var(--text);
+    }
+
+    #toggle-monitor-button:disabled {
+        opacity: 0.4;
+        cursor: wait;
+    }
+
 </style>
+{% endblock %}
 
-<body>
+{% block content %}
 
-    <h1>🔔 Pingger</h1>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <h2>{{ monitor.name }}</h2>
-    <p>
-        Status:
+    <!-- ── Page Header ── -->
 
-        <strong id="monitor-status">
+    <div class="detail-header">
 
-            {% if monitor.is_active %}
-                🟢 Monitoring
-            {% else %}
-                ⏸ Paused
-            {% endif %}
+        <div>
+            <div class="detail-title-row">
+                <div class="detail-title">{{ monitor.name }}</div>
+                <strong id="monitor-status">
+                    {% if monitor.is_active %}
+                        <span class="badge badge-green">
+                            <span class="status-dot up"></span>
+                            Monitoring
+                        </span>
+                    {% else %}
+                        <span class="badge badge-gray">
+                            <span class="status-dot pause"></span>
+                            Paused
+                        </span>
+                    {% endif %}
+                </strong>
+            </div>
 
-        </strong>
-    </p>
+            <div class="detail-meta">
+                <span class="meta-chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                    <a href="{{ monitor.url }}" target="_blank">{{ monitor.url }}</a>
+                </span>
 
-    <p>
-        URL:
-        <a href="{{ monitor.url }}" target="_blank">
-            {{ monitor.url }}
-        </a>
-    </p>
+                <span class="meta-chip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    Every {{ monitor.check_interval }} minutes
+                </span>
+            </div>
+        </div>
 
-    <p>
-        Check every:
-        <strong>{{ monitor.check_interval }} minutes</strong>
-    </p>
+        <div class="detail-actions">
 
+            <a href="{% url 'check_monitor' monitor.id %}" class="btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                Check Now
+            </a>
 
-    <!-- Latest Status -->
-
-<div id="latest-status-section">
-
-    {% if latest_check %}
-
-        <hr>
-
-        <h2 id="latest-status">
-            {% if latest_check.success %}
-                🟢 WEBSITE IS UP
-            {% else %}
-                🔴 WEBSITE IS DOWN
-            {% endif %}
-        </h2>
-
-        <p>
-            Status Code:
-            <strong id="latest-status-code">
-                {{ latest_check.status_code|default:"—" }}
-            </strong>
-        </p>
-
-        <p>
-            Response Time:
-            <strong id="latest-response-time">
-                {% if latest_check.response_time %}
-                    {{ latest_check.response_time }} ms
+            <button
+                type="button"
+                id="toggle-monitor-button"
+                data-monitor-id="{{ monitor.id }}"
+            >
+                {% if monitor.is_active %}
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+                    </svg>
+                    Pause Monitoring
                 {% else %}
-                    —
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    Resume Monitoring
                 {% endif %}
-            </strong>
-        </p>
+            </button>
 
-        <p>
-            Last Checked:
-            <strong id="latest-checked">
-                {{ latest_check.checked_at }}
-            </strong>
-        </p>
+            <a href="{% url 'edit_monitor' monitor.id %}" class="btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                Edit
+            </a>
 
-        <p id="latest-error-container"
-           {% if not latest_check.error %}style="display:none;"{% endif %}>
-            Error:
-            <strong id="latest-error">
-                {{ latest_check.error }}
-            </strong>
-        </p>
+        </div>
 
-    {% else %}
-
-        <hr>
-
-        <h2 id="latest-status">
-            ⚪ NOT CHECKED YET
-        </h2>
-
-        <p>
-            No health checks have been performed yet.
-        </p>
-
-    {% endif %}
-
-</div>
-
-    
-    <!-- Health History -->
-<h2>Request / Response Logs</h2>
-
-<div class="log-terminal">
-
-    <div class="log-terminal-header">
-        Monitor Logs
-
-        <span class="live">
-            ● LIVE
-        </span>
     </div>
 
-    <div
-        id="log-content"
-        class="log-content"
-    >
-        Loading logs...
+
+    <!-- ── Latest Status Panel ── -->
+
+    <div id="latest-status-section">
+
+        {% if latest_check %}
+
+            <div class="status-panel">
+
+                <div class="status-indicator">
+                    <div class="big-dot {% if latest_check.success %}up{% else %}down{% endif %}"></div>
+                    <div class="status-text {% if latest_check.success %}up{% else %}down{% endif %}">
+                        {% if latest_check.success %}UP{% else %}DOWN{% endif %}
+                    </div>
+                    <div class="status-label">Status</div>
+                </div>
+
+                <div class="status-metrics">
+
+                    <div class="metric-block">
+                        <div class="metric-label">Status Code</div>
+                        <div class="metric-value" id="latest-status-code">{{ latest_check.status_code|default:"—" }}</div>
+                    </div>
+
+                    <div class="metric-block">
+                        <div class="metric-label">Response Time</div>
+                        <div class="metric-value" id="latest-response-time">
+                            {% if latest_check.response_time %}{{ latest_check.response_time }} ms{% else %}—{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="metric-block">
+                        <div class="metric-label">Last Checked</div>
+                        <div class="metric-value" style="font-size:14px;" id="latest-checked">{{ latest_check.checked_at }}</div>
+                    </div>
+
+                    {% if latest_check.error %}
+                    <div class="error-block" id="latest-error-container">
+                        <strong>Error:</strong>
+                        <span id="latest-error">{{ latest_check.error }}</span>
+                    </div>
+                    {% else %}
+                    <div id="latest-error-container" style="display:none;">
+                        Error: <span id="latest-error"></span>
+                    </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        {% else %}
+
+            <div class="status-panel">
+                <div class="status-indicator">
+                    <div class="big-dot unknown"></div>
+                    <div class="status-label">Unknown</div>
+                </div>
+
+                <div class="not-checked">
+                    <div class="not-checked-icon">📡</div>
+                    <div id="latest-status" class="not-checked-text">No health checks have been performed yet.</div>
+                    <div id="latest-status-code" style="display:none;"></div>
+                    <div id="latest-response-time" style="display:none;"></div>
+                    <div id="latest-checked" style="display:none;"></div>
+                    <div id="latest-error-container" style="display:none;">
+                        <span id="latest-error"></span>
+                    </div>
+                </div>
+            </div>
+
+        {% endif %}
+
     </div>
 
-</div>
 
-<hr>
+    <!-- ── Log Terminal ── -->
 
-<h2>Performance</h2>
+    <div class="section-header-bar">
+        <div class="section-title-bar">Request / Response Logs</div>
+    </div>
 
-<div style="max-width: 900px;">
+    <div class="log-terminal">
 
-    <h3>Response Time</h3>
+        <div class="log-terminal-header">
+            <div class="log-terminal-title">
+                <div class="log-dots">
+                    <div class="log-dot red"></div>
+                    <div class="log-dot yellow"></div>
+                    <div class="log-dot green"></div>
+                </div>
+                Monitor Logs
+            </div>
 
-    <canvas id="responseTimeChart"></canvas>
+            <span class="live">
+                <span class="live-dot"></span>
+                LIVE
+            </span>
+        </div>
 
-</div>
+        <div id="log-content" class="log-content">
+            Loading logs...
+        </div>
 
-
-<br><br>
-
-
-<div style="max-width: 900px;">
-
-    <h3>Website Status</h3>
-
-    <canvas id="statusChart"></canvas>
-
-</div>
-
-    <hr>
+    </div>
 
 
+    <!-- ── Charts ── -->
+
+    <div class="section-header-bar">
+        <div class="section-title-bar">Performance</div>
+    </div>
+
+    <div class="chart-grid">
+
+        <div class="chart-card">
+            <div class="chart-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Response Time (ms)
+            </div>
+            <canvas id="responseTimeChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                Website Status
+            </div>
+            <canvas id="statusChart"></canvas>
+        </div>
+
+    </div>
 
 
-    <br>
+    <!-- ── Back Link ── -->
 
-    <a href="{% url 'check_monitor' monitor.id %}">
-        🔄 Check Now
+    <a href="{% url 'monitor_list' %}" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Back to Monitors
     </a>
-    <button
-    type="button"
-    id="toggle-monitor-button"
-    data-monitor-id="{{ monitor.id }}"
->
-    {% if monitor.is_active %}
-        ⏸ Pause Monitoring
-    {% else %}
-        ▶ Resume Monitoring
-    {% endif %}
-    </button>
 
 
-    <br><br>
-
-    <a href="{% url 'monitor_list' %}">
-        ← Back to Monitors
-    </a>
     <script>
 
 let responseTimeChart = null;
@@ -300,19 +733,31 @@ toggleButton.addEventListener("click", async function () {
 
         if (data.is_active) {
 
-            monitorStatus.textContent =
-                "🟢 Monitoring";
+            monitorStatus.innerHTML = `
+                <span class="badge badge-green">
+                    <span class="status-dot up"></span>
+                    Monitoring
+                </span>`;
 
-            toggleButton.textContent =
-                "⏸ Pause Monitoring";
+            toggleButton.innerHTML = `
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+                </svg>
+                Pause Monitoring`;
 
         } else {
 
-            monitorStatus.textContent =
-                "⏸ Paused";
+            monitorStatus.innerHTML = `
+                <span class="badge badge-gray">
+                    <span class="status-dot pause"></span>
+                    Paused
+                </span>`;
 
-            toggleButton.textContent =
-                "▶ Resume Monitoring";
+            toggleButton.innerHTML = `
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Resume Monitoring`;
         }
 
     } catch (error) {
@@ -392,46 +837,52 @@ function loadLogs() {
                     );
 
 
-                if (latest.success) {
-
-                    statusElement.textContent =
-                        "🟢 WEBSITE IS UP";
-
-                } else {
-
-                    statusElement.textContent =
-                        "🔴 WEBSITE IS DOWN";
-
+                if (statusElement) {
+                    if (latest.success) {
+                        statusElement.textContent =
+                            "🟢 WEBSITE IS UP";
+                    } else {
+                        statusElement.textContent =
+                            "🔴 WEBSITE IS DOWN";
+                    }
                 }
 
 
-                statusCodeElement.textContent =
-                    latest.status_code ?? "—";
+                if (statusCodeElement) {
+                    statusCodeElement.textContent =
+                        latest.status_code ?? "—";
+                }
 
 
-                responseTimeElement.textContent =
-                    latest.response_time !== null
-                        ? latest.response_time + " ms"
-                        : "—";
+                if (responseTimeElement) {
+                    responseTimeElement.textContent =
+                        latest.response_time !== null
+                            ? latest.response_time + " ms"
+                            : "—";
+                }
 
 
-                checkedElement.textContent =
-                    latest.checked_at;
+                if (checkedElement) {
+                    checkedElement.textContent =
+                        latest.checked_at;
+                }
 
 
-                if (latest.error) {
+                if (errorContainer && errorElement) {
+                    if (latest.error) {
 
-                    errorElement.textContent =
-                        latest.error;
+                        errorElement.textContent =
+                            latest.error;
 
-                    errorContainer.style.display =
-                        "block";
+                        errorContainer.style.display =
+                            "block";
 
-                } else {
+                    } else {
 
-                    errorContainer.style.display =
-                        "none";
+                        errorContainer.style.display =
+                            "none";
 
+                    }
                 }
 
             }
@@ -453,9 +904,7 @@ function loadLogs() {
             ) {
 
                 container.innerHTML =
-                    '<div class="log-line">' +
-                    'No requests recorded yet.' +
-                    '</div>';
+                    '<div class="log-line"><span class="log-time">—</span>&nbsp;<span style="color:#8b949e;">No requests recorded yet.</span></div>';
 
                 return;
             }
@@ -588,6 +1037,15 @@ function loadGraphs() {
                 );
 
 
+            const chartDefaults = {
+                color: '#94a3b8',
+                borderColor: '#1e2330',
+            };
+
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.borderColor = '#1e2330';
+
+
             /* Response Time Chart */
 
             const responseCanvas =
@@ -629,7 +1087,15 @@ function loadGraphs() {
 
                                     tension: 0.3,
 
-                                    spanGaps: true
+                                    spanGaps: true,
+
+                                    borderColor: '#6366f1',
+                                    backgroundColor: 'rgba(99,102,241,0.08)',
+                                    fill: true,
+                                    pointBackgroundColor: '#6366f1',
+                                    pointRadius: 3,
+                                    pointHoverRadius: 5,
+                                    borderWidth: 2,
 
                                 }
 
@@ -641,11 +1107,22 @@ function loadGraphs() {
 
                             responsive: true,
 
+                            plugins: {
+                                legend: { display: false }
+                            },
+
                             scales: {
+
+                                x: {
+                                    grid: { color: '#1e2330' },
+                                    ticks: { color: '#64748b', maxRotation: 45, font: { size: 10 } }
+                                },
 
                                 y: {
 
-                                    beginAtZero: true
+                                    beginAtZero: true,
+                                    grid: { color: '#1e2330' },
+                                    ticks: { color: '#64748b' }
 
                                 }
 
@@ -700,7 +1177,15 @@ function loadGraphs() {
 
                                     tension: 0,
 
-                                    spanGaps: true
+                                    spanGaps: true,
+
+                                    borderColor: '#22c55e',
+                                    backgroundColor: 'rgba(34,197,94,0.08)',
+                                    fill: true,
+                                    pointBackgroundColor: '#22c55e',
+                                    pointRadius: 3,
+                                    pointHoverRadius: 5,
+                                    borderWidth: 2,
 
                                 }
 
@@ -712,7 +1197,16 @@ function loadGraphs() {
 
                             responsive: true,
 
+                            plugins: {
+                                legend: { display: false }
+                            },
+
                             scales: {
+
+                                x: {
+                                    grid: { color: '#1e2330' },
+                                    ticks: { color: '#64748b', maxRotation: 45, font: { size: 10 } }
+                                },
 
                                 y: {
 
@@ -720,9 +1214,12 @@ function loadGraphs() {
 
                                     max: 1,
 
+                                    grid: { color: '#1e2330' },
+
                                     ticks: {
 
                                         stepSize: 1,
+                                        color: '#64748b',
 
                                         callback:
                                             function(value) {
@@ -782,7 +1279,6 @@ setInterval(
     30000
 );
 
-</script>
+    </script>
 
 {% endblock %}
-    
