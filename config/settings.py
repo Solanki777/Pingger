@@ -24,13 +24,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-h0sn#ay$0u)002q%q^a09&=w%2s7!f8pjp4k%8)y3v66vbed-0"
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    "django-insecure-local-development-only"
+)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get(
+    "DEBUG",
+    "True"
+) == "True"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get(
+        "ALLOWED_HOSTS",
+        "127.0.0.1,localhost"
+    ).split(",")
+    if host.strip()
+]
 
 
 # Application definition
@@ -38,6 +49,7 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
+
 INSTALLED_APPS = [
     "allauth", 
     "allauth.account",
@@ -86,6 +98,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -122,14 +135,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "pingger",
-        "USER": "postgres",
-        "PASSWORD": "i_am_the_admin7@",
-        "HOST": "localhost",
-        "PORT": "5432",
+        "NAME": os.environ.get("DB_NAME", "pingger"),
+        "USER": os.environ.get("DB_USER", "postgres"),
+        "PASSWORD": os.environ.get("DB_PASSWORD"),
+        "HOST": os.environ.get("DB_HOST", "localhost"),
+        "PORT": os.environ.get("DB_PORT", "5432"),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
@@ -164,7 +176,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 # Email
@@ -175,9 +189,16 @@ MAILERS = {
         "BACKEND": "django.core.mail.backends.console.EmailBackend",
     },
 }
-CELERY_BROKER_URL = "redis://localhost:6379/0"
 
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_BROKER_URL = os.environ.get(
+    "REDIS_URL",
+    "redis://localhost:6379/0"
+)
+
+CELERY_RESULT_BACKEND = os.environ.get(
+    "REDIS_URL",
+    "redis://localhost:6379/0"
+)
 
 
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
