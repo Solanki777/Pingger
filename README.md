@@ -72,9 +72,69 @@ The following screenshots demonstrate the working Pingger application.
 | 🕹 **Manual checks** | Trigger an instant check from the dashboard at any time |
 | ✏️ **Full CRUD** | Add, edit, pause/resume, and delete monitors |
 
+## 🏗️ System Architecture
+
+Pingger follows a decoupled, asynchronous, and event-driven architecture designed for high availability and non-blocking monitoring workflows. The platform cleanly separates synchronous user interactions from background distributed health checking and alert dispatching.
+
+### Request Lifecycle & Orchestration
+
+The core monitoring lifecycle is orchestrated through **Django**, **Celery Beat**, **Redis**, and **Celery Workers**:
+
+```mermaid
+graph TD
+    User([User / Web Browser]) <--> UI[Django Web Tier / Templates & Charts]
+    
+    subgraph "Web & Ingestion Layer"
+        UI --> Auth[django-allauth: Google & GitHub OAuth]
+        UI --> Views[Monitor CRUD & API Endpoints]
+        Views --> DB[(PostgreSQL Database)]
+        Views --> DynamicScheduler[Dynamic Task Scheduler]
+    end
+    
+    subgraph "Asynchronous Scheduling & Broker"
+        DynamicScheduler --> Beat[Celery Beat Scheduler]
+        Beat -->|Dispatch Periodic Tasks| Redis[(Redis Message Broker)]
+        Redis --> WorkerPool[Celery Worker Pool]
+    end
+    
+    subgraph "Probing & Execution Engine"
+        WorkerPool --> Probe[Health Check Prober]
+        Views -.->|Manual Instant Check| Probe
+        Probe -->|HTTP/HTTPS GET with Timeout| TargetSite([Monitored Target Website])
+        TargetSite -.->|Status Code / Latency / Error| Probe
+    end
+
+    subgraph "State Evaluation & Alert Pipeline"
+        Probe --> StateEngine[State Transition & Uptime Evaluator]
+        StateEngine --> DB
+        StateEngine -->|State Change: UP ➔ DOWN / DOWN ➔ UP| AlertEngine[Alert Engine]
+        AlertEngine --> InApp[In-App Alert Record]
+        AlertEngine --> SMTP[Gmail SMTP Service]
+        SMTP --> Email([User Email Alert 🔴 / 🟢])
+        InApp --> DB
+    end
+```
+
+### Architectural Highlights
+
+1. **Dynamic Task Scheduling (`django-celery-beat`)**:
+   - When a user creates, edits, or toggles a monitor, Django dynamically creates or updates `PeriodicTask` and `IntervalSchedule` records in the database.
+   - Celery Beat monitors the database for schedule updates and dispatches execution tasks into the Redis queue at each monitor's configured interval.
+
+2. **Distributed Asynchronous Worker Pool (`Celery + Redis`)**:
+   - Celery workers consume tasks from Redis, performing outbound HTTP/HTTPS probes concurrently without blocking the main web server.
+   - Outbound requests capture precise response times (ms), HTTP status codes, and handle connection errors/timeouts gracefully.
+
+3. **Smart State Transition & Alert Suppression**:
+   - The state engine compares the current check against the previous check state.
+   - Alerts are triggered **only on actual state transitions** ($UP \rightarrow DOWN$ or $DOWN \rightarrow UP$), preventing alert fatigue and email spam while the site remains in a continuous state.
+
+4. **Telemetry & Uptime Analytics Engine**:
+   - Historical check records feed the uptime engine, which accurately calculates 24-hour, 7-day, and 30-day availability percentages while taking monitor pause/resume states (`MonitorState`) into account.
+
 ---
 
-## 🏗 Tech Stack
+## 🛠 Tech Stack
 
 | Layer | Technology |
 |---|---|
