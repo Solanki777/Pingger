@@ -23,14 +23,14 @@ Pingger lets you track the health of any URL on a configurable schedule. It reco
 The following screenshots demonstrate the working Pingger application.
 
 ### 🔐 Google Login
-
-
+![Pingger Login](screenshots/Login.png)
+![Pingger welcome](screenshots/welcome.png)
 
 ### 📊 Monitoring Dashboard
 
 ![Pingger Dashboard](screenshots/dashboard.png)
 
-### 🌐 Add Website Monitor
+### 🌐 Add or Save Website Monitor
 
 ![Add Monitor](screenshots/add-monitor.png)
 
@@ -45,10 +45,6 @@ The following screenshots demonstrate the working Pingger application.
 ### 📈 Monitoring Graph
 
 ![Monitoring Graph](screenshots/monitor-graph.png)
-
-### 📋 Health Check Logs
-
-![Health Check Logs](screenshots/health-logs.png)
 
 ### 🔔 Alerts & Notifications
 
