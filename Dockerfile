@@ -1,4 +1,3 @@
-
 FROM python:3.13-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -21,4 +20,4 @@ RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "python manage.py migrate --noinput && python -m gunicorn config.wsgi:application --bind 0.0.0.0:8000"]
+CMD ["sh", "-c", "echo 'Running database migrations...' && python manage.py migrate --noinput && echo 'Migrations completed successfully.' && python -m gunicorn config.wsgi:application --bind 0.0.0.0:8000"]
