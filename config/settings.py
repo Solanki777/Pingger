@@ -55,9 +55,9 @@ AUTHENTICATION_BACKENDS = [
 INSTALLED_APPS = [
     "allauth", 
     "allauth.account",
-    "allauth.socialaccount",
-    "allauth.socialaccount.providers.google",
-    "allauth.socialaccount.providers.github", 
+    # "allauth.socialaccount",
+    # "allauth.socialaccount.providers.google",
+    # "allauth.socialaccount.providers.github", 
     "monitor",
     "django_celery_beat",
     "django.contrib.admin",
