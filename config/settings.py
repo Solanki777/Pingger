@@ -35,6 +35,8 @@ DEBUG = os.environ.get(
 ) == "True"
 
 ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
     "pingger.pingger.blitz.cloud",
     "app-pingger.u-pingger.svc.cluster.local",
 ]
