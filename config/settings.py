@@ -55,9 +55,9 @@ AUTHENTICATION_BACKENDS = [
 INSTALLED_APPS = [
     "allauth", 
     "allauth.account",
-    # "allauth.socialaccount",
-    # "allauth.socialaccount.providers.google",
-    # "allauth.socialaccount.providers.github", 
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.github", 
     "monitor",
     "django_celery_beat",
     "django.contrib.admin",
@@ -208,3 +208,21 @@ CELERY_RESULT_BACKEND = os.environ.get(
 
 
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+}
