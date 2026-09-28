@@ -13,7 +13,7 @@ def perform_health_check(monitor, check_type="user"):
     try:
         response = requests.get(
             monitor.url,
-            timeout=10
+            timeout=30
         )
 
         end_time = time.time()
