@@ -72,7 +72,6 @@ SITE_ID = 2
 LOGIN_REDIRECT_URL = "/monitors/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 SOCIALACCOUNT_LOGIN_ON_GET = True
-
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": [
@@ -82,10 +81,11 @@ SOCIALACCOUNT_PROVIDERS = {
         "AUTH_PARAMS": {
             "access_type": "online",
         },
+        "EMAIL_AUTHENTICATION": True,
     }
 }
 
-
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 
 ACCOUNT_SIGNUP_FIELDS = ["email*"]
