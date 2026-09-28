@@ -68,7 +68,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",
 ]
-SITE_ID = 1
+SITE_ID = 2
 LOGIN_REDIRECT_URL = "/monitors/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 SOCIALACCOUNT_LOGIN_ON_GET = True
