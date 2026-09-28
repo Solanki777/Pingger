@@ -4,13 +4,19 @@ from django.db import migrations
 def create_site(apps, schema_editor):
     Site = apps.get_model("sites", "Site")
 
-    Site.objects.update_or_create(
-        id=1,
-        defaults={
-            "domain": "pingger.pingger.blitz.cloud",
-            "name": "Pingger",
-        },
-    )
+    site = Site.objects.filter(
+        domain="pingger.pingger.blitz.cloud"
+    ).first()
+
+    if site:
+        site.name = "Pingger"
+        site.save(update_fields=["name"])
+    else:
+        Site.objects.create(
+            id=1,
+            domain="pingger.pingger.blitz.cloud",
+            name="Pingger",
+        )
 
 
 class Migration(migrations.Migration):
